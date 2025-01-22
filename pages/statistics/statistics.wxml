@@ -1,0 +1,40 @@
+<!--pages/statistics/statistics.wxml-->
+<view class="container">
+  <!-- 时间选择 -->
+  <view class="time-select">
+    <picker mode="date" fields="month" value="{{currentDate}}" bindchange="dateChange">
+      <view class="picker">
+        {{currentYear}}年{{currentMonth}}月
+      </view>
+    </picker>
+  </view>
+
+  <!-- 收支总览 -->
+  <view class="overview">
+    <view class="overview-item">
+      <text class="label">支出</text>
+      <text class="amount expense">¥{{totalExpense}}</text>
+    </view>
+    <view class="overview-item">
+      <text class="label">收入</text>
+      <text class="amount income">¥{{totalIncome}}</text>
+    </view>
+  </view>
+
+  <!-- 分类统计 -->
+  <view class="category-stats">
+    <view class="stats-title">支出排行</view>
+    <view class="stats-list">
+      <view class="stats-item" wx:for="{{expenseStats}}" wx:key="category">
+        <view class="category-info">
+          <text class="category-name">{{item.category}}</text>
+          <text class="category-percent">{{item.percent}}%</text>
+        </view>
+        <view class="progress-bar">
+          <view class="progress" style="width: {{item.percent}}%"></view>
+        </view>
+        <text class="amount">¥{{item.amount}}</text>
+      </view>
+    </view>
+  </view>
+</view>

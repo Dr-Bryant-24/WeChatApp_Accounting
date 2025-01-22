@@ -1,0 +1,37 @@
+<!--pages/index/index.wxml-->
+<view class="container">
+  <!-- 顶部统计 -->
+  <view class="header">
+    <view class="month-select">
+      <text class="month">{{currentMonth}}月</text>
+      <text class="year">{{currentYear}}</text>
+    </view>
+    <view class="amount-info">
+      <view class="expense">
+        <text class="label">支出</text>
+        <text class="amount">¥{{totalExpense}}</text>
+      </view>
+      <view class="income">
+        <text class="label">收入</text>
+        <text class="amount">¥{{totalIncome}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 账单列表 -->
+  <view class="bill-list">
+    <block wx:for="{{bills}}" wx:key="id">
+      <view class="bill-item">
+        <view class="left">
+          <view class="category">{{item.category}}</view>
+          <view class="date">{{item.date}}</view>
+        </view>
+        <view class="right">
+          <text class="amount {{item.type === 'expense' ? 'expense' : 'income'}}">
+            {{item.type === 'expense' ? '-' : '+'}}¥{{item.amount}}
+          </text>
+        </view>
+      </view>
+    </block>
+  </view>
+</view>

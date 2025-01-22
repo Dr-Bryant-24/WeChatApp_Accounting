@@ -1,0 +1,40 @@
+<view class="container">
+  <view class="form">
+    <view class="form-item">
+      <text class="label">收益日期</text>
+      <picker mode="date" value="{{date}}" bindchange="onDateChange">
+        <view class="picker">
+          {{date || '请选择日期'}}
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <text class="label">收益金额</text>
+      <input type="digit" value="{{amount}}" bindinput="onAmountInput" placeholder="请输入收益金额"/>
+    </view>
+
+    <view class="form-item">
+      <text class="label">备注说明</text>
+      <input type="text" value="{{remark}}" bindinput="onRemarkInput" placeholder="请输入备注说明（选填）"/>
+    </view>
+  </view>
+
+  <view class="save-btn {{canSave ? '' : 'disabled'}}" bindtap="saveDailyReturn">
+    保存
+  </view>
+
+  <!-- 历史记录 -->
+  <view class="history" wx:if="{{returns.length > 0}}">
+    <view class="history-title">历史记录</view>
+    <view class="history-list">
+      <view class="history-item" wx:for="{{returns}}" wx:key="id">
+        <view class="history-info">
+          <text class="history-date">{{item.date}}</text>
+          <text class="history-amount">¥{{item.amount}}</text>
+        </view>
+        <text class="history-remark" wx:if="{{item.remark}}">{{item.remark}}</text>
+      </view>
+    </view>
+  </view>
+</view> 

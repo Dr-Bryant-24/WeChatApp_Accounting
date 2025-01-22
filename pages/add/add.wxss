@@ -1,0 +1,110 @@
+/* pages/add/add.wxss */
+.container {
+  padding: 30rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.type-switch {
+  display: flex;
+  background: #fff;
+  padding: 20rpx;
+  border-radius: 10rpx;
+  margin-bottom: 30rpx;
+}
+
+.type-item {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx 0;
+  font-size: 32rpx;
+  color: #666;
+}
+
+.type-item.active {
+  color: #1296db;
+  font-weight: bold;
+}
+
+.amount-input {
+  background: #fff;
+  padding: 40rpx 30rpx;
+  border-radius: 10rpx;
+  margin-bottom: 30rpx;
+  display: flex;
+  align-items: center;
+}
+
+.currency {
+  font-size: 40rpx;
+  color: #333;
+  margin-right: 20rpx;
+}
+
+.amount-input input {
+  font-size: 40rpx;
+  flex: 1;
+}
+
+.category-list {
+  background: #fff;
+  padding: 30rpx;
+  border-radius: 10rpx;
+  margin-bottom: 30rpx;
+}
+
+.category-title {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 20rpx;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20rpx;
+}
+
+.category-item {
+  text-align: center;
+  padding: 20rpx 0;
+}
+
+.category-item.active {
+  background: #e6f7ff;
+  border-radius: 10rpx;
+}
+
+.category-icon {
+  font-size: 40rpx;
+  margin-bottom: 10rpx;
+}
+
+.category-name {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.remark-input {
+  background: #fff;
+  padding: 30rpx;
+  border-radius: 10rpx;
+  margin-bottom: 60rpx;
+}
+
+.remark-input input {
+  font-size: 28rpx;
+}
+
+.save-btn {
+  background: #1296db;
+  color: #fff;
+  text-align: center;
+  padding: 30rpx 0;
+  border-radius: 10rpx;
+  font-size: 32rpx;
+}
+
+.save-btn.disabled {
+  background: #ccc;
+}

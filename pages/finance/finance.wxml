@@ -1,0 +1,42 @@
+<view class="container">
+  <!-- 添加理财产品按钮 -->
+  <view class="add-btn" bindtap="navigateToAdd">
+    <text class="icon">+</text>
+    <text>添加理财产品</text>
+  </view>
+
+  <!-- 理财产品列表 -->
+  <view class="product-list">
+    <view class="product-item" wx:for="{{products}}" wx:key="id">
+      <!-- 修改标题布局，将投入金额放到名称后面 -->
+      <view class="product-title">
+        {{item.name}}
+        <text class="product-amount">(投入金额:¥{{item.amount}})</text>
+      </view>
+      
+      <view class="product-header">
+        <view class="product-actions">
+          <button class="btn" bindtap="addDailyReturn" data-id="{{item.id}}">记录</button>
+          <button class="btn delete" bindtap="deleteProduct" data-id="{{item.id}}">删除</button>
+        </view>
+      </view>
+
+      <!-- 收益图表 -->
+      <view class="chart-container">
+        <canvas canvas-id="returnChart{{item.id}}" class="return-chart"></canvas>
+      </view>
+
+      <!-- 收益统计 -->
+      <view class="return-stats">
+        <view class="stat-item">
+          <text class="label">平均日收益</text>
+          <text class="value">¥{{item.averageReturn}}</text>
+        </view>
+        <view class="stat-item">
+          <text class="label">累计收益</text>
+          <text class="value">¥{{item.totalReturn}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view> 

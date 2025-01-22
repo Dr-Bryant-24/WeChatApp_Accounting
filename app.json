@@ -1,0 +1,50 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/add/add",
+    "pages/statistics/statistics",
+    "pages/finance/finance",
+    "pages/finance/add-product/add-product",
+    "pages/finance/daily-return/daily-return"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "简单记账",
+    "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#1296db",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "账单",
+        "iconPath": "./assets/tab-icons/bill.png",
+        "selectedIconPath": "./assets/tab-icons/bill_selected.png"
+      },
+      {
+        "pagePath": "pages/add/add",
+        "text": "记账",
+        "iconPath": "./assets/tab-icons/add.png",
+        "selectedIconPath": "./assets/tab-icons/add_selected.png"
+      },
+      {
+        "pagePath": "pages/statistics/statistics",
+        "text": "统计",
+        "iconPath": "./assets/tab-icons/statistics.png",
+        "selectedIconPath": "./assets/tab-icons/statistics_selected.png"
+      },
+      {
+        "pagePath": "pages/finance/finance",
+        "text": "理财",
+        "iconPath": "./assets/tab-icons/finance.png",
+        "selectedIconPath": "./assets/tab-icons/finance_selected.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+} 

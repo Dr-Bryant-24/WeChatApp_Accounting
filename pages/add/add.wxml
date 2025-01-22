@@ -1,0 +1,39 @@
+<!--pages/add/add.wxml-->
+<view class="container">
+  <!-- 类型切换 -->
+  <view class="type-switch">
+    <view class="type-item {{type === 'expense' ? 'active' : ''}}" bindtap="switchType" data-type="expense">支出</view>
+    <view class="type-item {{type === 'income' ? 'active' : ''}}" bindtap="switchType" data-type="income">收入</view>
+  </view>
+
+  <!-- 金额输入 -->
+  <view class="amount-input">
+    <text class="currency">¥</text>
+    <input type="digit" value="{{amount}}" bindinput="onAmountInput" placeholder="0.00"/>
+  </view>
+
+  <!-- 分类选择 -->
+  <view class="category-list">
+    <view class="category-title">选择分类</view>
+    <view class="category-grid">
+      <view class="category-item {{selectedCategory.id === item.id ? 'active' : ''}}" 
+            wx:for="{{categories}}" 
+            wx:key="id"
+            bindtap="selectCategory"
+            data-category="{{item}}">
+        <view class="category-icon">{{item.icon}}</view>
+        <view class="category-name">{{item.name}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 备注输入 -->
+  <view class="remark-input">
+    <input type="text" value="{{remark}}" bindinput="onRemarkInput" placeholder="添加备注"/>
+  </view>
+
+  <!-- 保存按钮 -->
+  <view class="save-btn {{canSave ? '' : 'disabled'}}" bindtap="saveBill">
+    保存
+  </view>
+</view>

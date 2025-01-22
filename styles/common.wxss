@@ -1,0 +1,50 @@
+/* 常用颜色 */
+.primary-color {
+  color: #1296db;
+}
+
+.success-color {
+  color: #52c41a;
+}
+
+.warning-color {
+  color: #faad14;
+}
+
+.error-color {
+  color: #f5222d;
+}
+
+/* 常用间距 */
+.margin-sm {
+  margin: 10rpx;
+}
+
+.margin-md {
+  margin: 20rpx;
+}
+
+.padding-sm {
+  padding: 10rpx;
+}
+
+.padding-md {
+  padding: 20rpx;
+}
+
+/* 弹性布局 */
+.flex {
+  display: flex;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.align-center {
+  align-items: center;
+} 

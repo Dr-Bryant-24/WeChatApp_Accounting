@@ -1,0 +1,22 @@
+<view class="container">
+  <view class="form">
+    <view class="form-item">
+      <text class="label">产品名称</text>
+      <input type="text" value="{{name}}" bindinput="onNameInput" placeholder="请输入产品名称"/>
+    </view>
+
+    <view class="form-item">
+      <text class="label">投入金额</text>
+      <input type="digit" value="{{amount}}" bindinput="onAmountInput" placeholder="请输入投入金额"/>
+    </view>
+
+    <view class="form-item">
+      <text class="label">备注说明</text>
+      <input type="text" value="{{remark}}" bindinput="onRemarkInput" placeholder="请输入备注说明（选填）"/>
+    </view>
+  </view>
+
+  <view class="save-btn {{canSave ? '' : 'disabled'}}" bindtap="saveProduct">
+    保存
+  </view>
+</view> 
