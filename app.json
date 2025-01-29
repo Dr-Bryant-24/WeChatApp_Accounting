@@ -5,7 +5,9 @@
     "pages/statistics/statistics",
     "pages/finance/finance",
     "pages/finance/add-product/add-product",
-    "pages/finance/daily-return/daily-return"
+    "pages/finance/daily-return/daily-return",
+    "pages/finance/finance-detail/finance-detail",
+    "pages/finance/date-picker/date-picker"
   ],
   "window": {
     "backgroundTextStyle": "light",

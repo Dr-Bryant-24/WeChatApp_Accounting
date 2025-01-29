@@ -8,10 +8,9 @@
   <!-- 理财产品列表 -->
   <view class="product-list">
     <view class="product-item" wx:for="{{products}}" wx:key="id">
-      <!-- 修改标题布局，将投入金额放到名称后面 -->
-      <view class="product-title">
+      <!-- 修改标题为可点击 -->
+      <view class="product-title" bindtap="navigateToDetail" data-id="{{item.id}}">
         {{item.name}}
-        <text class="product-amount">(投入金额:¥{{item.amount}})</text>
       </view>
       
       <view class="product-header">
@@ -23,7 +22,13 @@
 
       <!-- 收益图表 -->
       <view class="chart-container">
-        <canvas canvas-id="returnChart{{item.id}}" class="return-chart"></canvas>
+        <canvas class="product-chart" 
+                canvas-id="chart-{{item.id}}"
+                bindtouchstart="onChartTouchStart"
+                bindtouchend="onChartTouchEnd"
+                data-productid="{{item.id}}">
+        </canvas>
+        <view class="chart-hint">左右滑动查看更多数据</view>
       </view>
 
       <!-- 收益统计 -->
