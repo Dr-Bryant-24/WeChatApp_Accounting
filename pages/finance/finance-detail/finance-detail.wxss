@@ -29,9 +29,21 @@
 }
 
 .info-item .value {
+  font-size: 32rpx;
   color: #333;
-  font-size: 28rpx;
   font-weight: bold;
+}
+
+.value.blue {
+  color: #1296db;
+}
+
+.value.green {
+  color: #006400;  /* 深绿色，用于投入金额 */
+}
+
+.value.red {
+  color: #ff4d4f;  /* 红色，用于年化收益率 */
 }
 
 .returns-table {
@@ -159,4 +171,35 @@
   color: #fff;
   font-size: 28rpx;
   border-radius: 10rpx;
+}
+
+.monthly-stats {
+  background-color: #f8f8f8;
+  padding: 20rpx;
+  color: #666;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 30rpx;
+  border-bottom: 1rpx solid #eee;
+}
+
+.monthly-stats text {
+  font-size: 28rpx;
+}
+
+.rate-value {
+  color: #ff4d4f;
+  font-weight: bold;
+}
+
+.return-value {
+  color: #1296db;
+  font-weight: bold;
+}
+
+/* 禁用月度统计行的点击效果 */
+.monthly-stats:active {
+  background-color: #f8f8f8;
 } 

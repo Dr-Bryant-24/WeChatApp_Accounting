@@ -1,8 +1,14 @@
 <view class="container">
-  <!-- 添加理财产品按钮 -->
-  <view class="add-btn" bindtap="navigateToAdd">
-    <text class="icon">+</text>
-    <text>添加理财产品</text>
+  <!-- 总收益统计 -->
+  <view class="total-stats">
+    <view class="total-item">
+      <text class="label">今日收益</text>
+      <text class="value today">¥{{todayTotalReturn}}</text>
+    </view>
+    <view class="total-item">
+      <text class="label">本月收益</text>
+      <text class="value month">¥{{monthTotalReturn}}</text>
+    </view>
   </view>
 
   <!-- 理财产品列表 -->
@@ -43,5 +49,11 @@
         </view>
       </view>
     </view>
+  </view>
+
+  <!-- 添加理财产品按钮 -->
+  <view class="add-btn" bindtap="navigateToAdd">
+    <text class="icon">+</text>
+    <text>添加理财产品</text>
   </view>
 </view> 

@@ -8,7 +8,7 @@
   background: #fff;
   padding: 30rpx;
   border-radius: 10rpx;
-  margin-bottom: 30rpx;
+  margin-top: 30rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -89,7 +89,7 @@
 }
 
 .chart-container {
-  height: 500rpx;
+  height: 200px;
   margin: 30rpx 0;
   padding: 0 20rpx;
   overflow: visible;
@@ -125,10 +125,8 @@
 }
 
 .product-chart {
-  width: 90%;
-  height: 450rpx;
-  margin: 20rpx 0;
-  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .chart-hint {
@@ -136,4 +134,38 @@
   font-size: 20rpx;
   color: #999;
   margin: 10rpx 0;
+}
+
+.total-stats {
+  background: #fff;
+  padding: 30rpx;
+  border-radius: 10rpx;
+  margin-bottom: 30rpx;
+  display: flex;
+  justify-content: space-around;
+}
+
+.total-item {
+  text-align: center;
+}
+
+.total-item .label {
+  font-size: 28rpx;
+  color: #666;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.total-item .value {
+  font-size: 36rpx;
+  font-weight: bold;
+  display: block;
+}
+
+.total-item .value.today {
+  color: #ffc107;  /* 黄色 */
+}
+
+.total-item .value.month {
+  color: #ff9800;  /* 橙色 */
 } 

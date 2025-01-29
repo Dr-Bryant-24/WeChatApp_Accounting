@@ -2,6 +2,12 @@ const FINANCE_PRODUCTS_KEY = 'FINANCE_PRODUCTS'
 const DAILY_RETURNS_KEY = 'FINANCE_DAILY_RETURNS'
 
 const financeStorage = {
+  // 获取单个理财产品
+  getProduct(id) {
+    const products = this.getProducts()
+    return products.find(p => p.id === Number(id))
+  },
+
   // 获取所有理财产品
   getProducts() {
     return wx.getStorageSync(FINANCE_PRODUCTS_KEY) || []

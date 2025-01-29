@@ -7,7 +7,9 @@ Page({
     chartDataMap: {},
     currentPages: {},
     pageSize: 30,
-    yAxisRanges: {}
+    yAxisRanges: {},
+    todayTotalReturn: '0.00',
+    monthTotalReturn: '0.00'
   },
 
   onLoad() {
@@ -23,12 +25,35 @@ Page({
     const products = financeStorage.getProducts()
     const chartDataMap = {}
     const currentPages = {}
-    const yAxisRanges = {}  // 创建新的对象而不是直接修改 this.data
+    const yAxisRanges = {}
     
-    products.forEach(product => {
+    // 计算今日和本月总收益
+    const today = new Date()
+    const todayStr = today.toISOString().slice(0, 10)
+    const monthStr = today.toISOString().slice(0, 7)
+    
+    let todayTotal = 0
+    let monthTotal = 0
+    
+    // 处理每个产品的数据
+    const processedProducts = products.map(product => {
       // 获取每个产品的收益记录并按日期降序排序
       const returns = financeStorage.getDailyReturns(product.id)
       returns.sort((a, b) => new Date(b.date) - new Date(a.date))
+      
+      // 计算今日收益
+      const todayReturn = returns.find(r => r.date === todayStr)
+      if (todayReturn) {
+        todayTotal += todayReturn.amount
+      }
+      
+      // 计算本月收益
+      const monthReturns = returns.filter(r => r.date.startsWith(monthStr))
+      monthTotal += monthReturns.reduce((sum, r) => sum + r.amount, 0)
+      
+      // 计算平均日收益和累计收益
+      const totalReturn = returns.reduce((sum, r) => sum + r.amount, 0)
+      const averageReturn = returns.length > 0 ? (totalReturn / returns.length).toFixed(2) : '0.00'
       
       // 计算整体的Y轴范围
       const allAmounts = returns.map(item => item.amount)
@@ -37,22 +62,30 @@ Page({
       const valueRange = maxAmount - minAmount
       yAxisRanges[product.id] = {
         max: valueRange === 0 ? maxAmount * 1.1 : maxAmount + valueRange * 0.1,
-        min: valueRange === 0 ? maxAmount * 0.9 : Math.max(0, minAmount - valueRange * 0.1)
+        min: valueRange === 0 ? maxAmount * 0.9 : minAmount - valueRange * 0.1
       }
       
       // 初始化每个产品的图表数据和页码
       chartDataMap[product.id] = returns.slice(0, this.data.pageSize).reverse()
       currentPages[product.id] = 0
+
+      // 返回添加了统计数据的产品对象
+      return {
+        ...product,
+        averageReturn,
+        totalReturn: totalReturn.toFixed(2)
+      }
     })
 
     this.setData({
-      products,
+      products: processedProducts,
       chartDataMap,
       currentPages,
-      yAxisRanges
+      yAxisRanges,
+      todayTotalReturn: todayTotal.toFixed(2),
+      monthTotalReturn: monthTotal.toFixed(2)
     }, () => {
-      // 为每个产品初始化图表
-      products.forEach(product => {
+      processedProducts.forEach(product => {
         this.initChart(product.id)
       })
     })
@@ -92,57 +125,60 @@ Page({
     const chartData = this.data.chartDataMap[productId]
     if (!chartData || chartData.length === 0) return
 
-    const dates = chartData.map(item => item.date.slice(5)) // 只显示月-日
-    const amounts = chartData.map(item => item.amount)
-
-    const ctx = wx.createCanvasContext(`chart-${productId}`)
-    
+    const canvasId = `chart-${productId}`
     // 获取系统信息以适配屏幕宽度
     const systemInfo = wx.getSystemInfoSync()
     // 将rpx转换为px
-    const canvasWidth = systemInfo.windowWidth * 0.9  // 留出10%的边距
-    const canvasHeight = 250  // 增加画布高度
+    const canvasWidth = systemInfo.windowWidth * 0.8  // 留出20%的边距
+    const canvasHeight = 200  // 固定高度
+
+    const ctx = wx.createCanvasContext(canvasId)
+
+    // 设置内边距
     const padding = {
-      top: 30,    // 增加顶部边距
-      right: 40,  // 增加右边距
-      bottom: 40, // 增加底部边距
-      left: 60    // 增加左边距，为标签留出更多空间
+      left: 50,
+      right: 30,
+      top: 20,
+      bottom: 30
     }
+
+    // 计算图表实际绘制区域
     const chartWidth = canvasWidth - padding.left - padding.right
     const chartHeight = canvasHeight - padding.top - padding.bottom
 
-    // 使用固定的Y轴范围
-    const { max: adjustedMax, min: adjustedMin } = this.data.yAxisRanges[productId]
-    const yScale = chartHeight / (adjustedMax - adjustedMin || 1)
-    const xScale = chartWidth / (dates.length - 1)
+    // 获取Y轴范围
+    const yRange = this.data.yAxisRanges[productId]
+    const adjustedMin = yRange.min
+    const adjustedMax = yRange.max
+    const valueRange = adjustedMax - adjustedMin
 
-    // 清空画布
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight)
-    ctx.setFillStyle('#ffffff')
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight)
+    // 计算Y轴刻度
+    const yScale = chartHeight / valueRange
+    const xScale = chartWidth / (chartData.length - 1)
 
-    // 先绘制Y轴标签
-    ctx.setFontSize(11)
-    ctx.setTextAlign('right')
-    ctx.setTextBaseline('middle')
-    ctx.setFillStyle('#666666')
-    const yGridCount = 4
-    for (let i = 0; i <= yGridCount; i++) {
-      const value = adjustedMax - (adjustedMax - adjustedMin) * (i / yGridCount)
-      const y = padding.top + (chartHeight / yGridCount) * i
-      const formattedValue = Number.isInteger(value) ? value.toString() : value.toFixed(2)
-      console.log('Drawing label:', formattedValue, 'at position:', padding.left - 8, y)
-      ctx.fillText(formattedValue, padding.left - 8, y)
-    }
+    // 绘制Y轴
+    ctx.beginPath()
+    ctx.setStrokeStyle('#ccc')
+    ctx.setLineWidth(1)
+    ctx.moveTo(padding.left, padding.top)
+    ctx.lineTo(padding.left, canvasHeight - padding.bottom)
+    ctx.stroke()
 
-    // 绘制网格线
-    ctx.setLineWidth(0.5)
-    ctx.setStrokeStyle('#eeeeee')
-    
-    // 横向网格线
-    for (let i = 0; i <= yGridCount; i++) {
-      const y = padding.top + (chartHeight / yGridCount) * i
+    // 绘制Y轴刻度和网格线
+    const yLabelCount = 5
+    const yLabelStep = valueRange / (yLabelCount - 1)
+    for (let i = 0; i < yLabelCount; i++) {
+      const y = padding.top + i * (chartHeight / (yLabelCount - 1))
+      const value = adjustedMax - i * yLabelStep
+      
+      // 绘制刻度值
+      ctx.setFontSize(10)
+      ctx.setTextAlign('right')
+      ctx.fillText(value.toFixed(2), padding.left - 5, y + 3)
+      
+      // 绘制网格线
       ctx.beginPath()
+      ctx.setStrokeStyle('#f0f0f0')
       ctx.moveTo(padding.left, y)
       ctx.lineTo(canvasWidth - padding.right, y)
       ctx.stroke()
@@ -150,11 +186,11 @@ Page({
 
     // 绘制折线
     ctx.beginPath()
-    ctx.setLineWidth(2)
     ctx.setStrokeStyle('#1296db')
+    ctx.setLineWidth(2)
+    const dates = chartData.map(item => item.date)
     chartData.forEach((item, index) => {
       const x = padding.left + index * xScale
-      // 修正Y轴坐标计算方式，使其与标签对应
       const y = padding.top + chartHeight - (item.amount - adjustedMin) * yScale
       if (index === 0) {
         ctx.moveTo(x, y)
@@ -177,28 +213,35 @@ Page({
     // 绘制X轴标签
     ctx.setFontSize(10)
     ctx.setTextAlign('center')
-    // 显示更多日期标签
-    const labelCount = 5  // 减少标签数量，为最后一个日期留出更多空间
-    const labelStep = Math.max(1, Math.floor((dates.length - 2) / (labelCount - 1)))  // 不包括最后一个日期在内计算步长
+    // 计算要显示的标签数量和间隔
+    const minLabelSpacing = 50  // 标签之间的最小间距(px)
+    const maxLabels = Math.floor(chartWidth / minLabelSpacing)  // 根据图表宽度计算最大标签数
+    const labelStep = Math.max(1, Math.ceil(dates.length / maxLabels))
+    
+    // 格式化日期，只显示月-日
+    const formatDate = (dateStr) => {
+      return dateStr.slice(5)  // 从第5个字符开始截取，去掉年份
+    }
+    
     dates.forEach((date, index) => {
-      // 显示第一个、最后一个和中间均匀分布的标签
-      if (index === 0 || index === dates.length - 1 || 
-          (index % labelStep === 0 && index < dates.length - 1)) {
+      // 均匀显示标签，但最后一个日期要单独处理
+      if (index === 0 || (index % labelStep === 0 && index < dates.length - 1)) {
         const x = padding.left + index * xScale
-        if (index === dates.length - 1) {
-          ctx.setTextAlign('right')
-          ctx.fillText(date, canvasWidth - padding.right + 15, canvasHeight - 15)  // 增加最后一个日期的右边距
-          // 在最后一个日期前添加一个小间隔
-          const prevX = padding.left + (dates.length - 2) * xScale
-          if (prevX + 30 > x) {  // 如果与前一个标签距离太近
-            return  // 跳过这个标签
-          }
-        } else {
-          ctx.setTextAlign('center')
-          ctx.fillText(date, x, canvasHeight - 15)
-        }
+        ctx.setTextAlign('center')
+        ctx.fillText(formatDate(date), x, canvasHeight - 15)
       }
     })
+    
+    // 单独处理最后一个日期标签
+    const lastX = padding.left + (dates.length - 1) * xScale
+    const lastLabelWidth = ctx.measureText(formatDate(dates[dates.length - 1])).width
+    const prevX = padding.left + ((Math.floor((dates.length - 1) / labelStep) * labelStep)) * xScale
+    
+    // 只有当最后一个标签与前一个标签不会重叠时才显示
+    if (lastX - prevX > lastLabelWidth + 20) {  // 20px 作为额外间距
+      ctx.setTextAlign('center')
+      ctx.fillText(formatDate(dates[dates.length - 1]), lastX, canvasHeight - 15)
+    }
 
     ctx.draw()
   },

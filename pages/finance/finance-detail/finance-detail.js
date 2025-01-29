@@ -12,11 +12,35 @@ Page({
     selectedYear: 0,
     selectedMonth: 0,
     selectedDay: 0,
-    currentEditReturn: null // 当前正在编辑的记录
+    currentEditReturn: null, // 当前正在编辑的记录
+    averageReturn: '0.00',
+    totalReturn: '0.00',
+    annualizedRate: '0.00',
+    dailyReturnPer10k: '0.0000'
   },
 
   onLoad(options) {
     const { id } = options
+    if (!id) {
+      wx.showToast({
+        title: '产品ID无效',
+        icon: 'error'
+      })
+      wx.navigateBack()
+      return
+    }
+
+    const product = financeStorage.getProduct(id)
+    if (!product) {
+      wx.showToast({
+        title: '产品不存在',
+        icon: 'error'
+      })
+      wx.navigateBack()
+      return
+    }
+
+    this.setData({ product })
     this.loadProductDetail(id)
     this.initDatePicker()
   },
@@ -53,11 +77,83 @@ Page({
     
     // 按日期降序排序
     returns.sort((a, b) => new Date(b.date) - new Date(a.date))
+    
+    // 处理月度统计数据
+    const monthlyStats = this.calculateMonthlyStats(returns, product.amount)
+    
+    // 将月度统计数据插入到对应月份的最后一天之前
+    const processedReturns = []
+    
+    returns.forEach(item => {
+      const itemMonth = item.date.slice(0, 7)  // 获取年月 (YYYY-MM)
+      const monthOnly = itemMonth.slice(5)  // 只获取月份 (MM)
+      const itemDay = parseInt(item.date.slice(8, 10))  // 获取日期
+      
+      // 检查是否是月份的最后一天
+      const lastDayOfMonth = new Date(itemMonth + '-01')
+      lastDayOfMonth.setMonth(lastDayOfMonth.getMonth() + 1)
+      lastDayOfMonth.setDate(0)
+      const lastDay = lastDayOfMonth.getDate()
+      
+      // 如果是月份的最后一天，添加月度统计
+      if (itemDay === lastDay && monthlyStats[itemMonth]) {
+        processedReturns.push({
+          id: `monthly-${itemMonth}`,
+          isMonthly: true,
+          month: monthOnly,  // 只使用月份
+          ...monthlyStats[itemMonth]
+        })
+      }
+      
+      processedReturns.push(item)
+    })
+    
+    // 重新计算所有统计数据
+    const totalReturn = returns.reduce((sum, r) => sum + r.amount, 0)
+    const averageReturn = returns.length > 0 ? (totalReturn / returns.length).toFixed(2) : '0.00'
+    
+    // 计算每万元日均收益和年化收益率
+    const dailyReturnPer10k = returns.length > 0 ? 
+      (Number(averageReturn) / product.amount * 10000) : 0
+    const annualizedRate = (dailyReturnPer10k * 365 / 10000 * 100).toFixed(2)
 
     this.setData({
       product,
-      returns
+      returns: processedReturns,
+      averageReturn,
+      totalReturn: totalReturn.toFixed(2),
+      dailyReturnPer10k: dailyReturnPer10k.toFixed(4),
+      annualizedRate
     })
+  },
+
+  // 计算月度统计数据
+  calculateMonthlyStats(returns, productAmount) {
+    const monthlyStats = {}
+    
+    // 按月份分组统计
+    returns.forEach(item => {
+      const month = item.date.slice(0, 7)  // 获取年月 (YYYY-MM)
+      if (!monthlyStats[month]) {
+        monthlyStats[month] = {
+          totalReturn: 0,
+          days: 0
+        }
+      }
+      monthlyStats[month].totalReturn += Number(item.amount)
+      monthlyStats[month].days++
+    })
+    
+    // 计算每个月的年化收益率
+    Object.keys(monthlyStats).forEach(month => {
+      const stats = monthlyStats[month]
+      const averageReturn = stats.totalReturn / stats.days
+      const dailyReturnPer10k = (averageReturn / productAmount * 10000)
+      stats.annualizedRate = (dailyReturnPer10k * 365 / 10000 * 100).toFixed(2)
+      stats.totalReturn = stats.totalReturn.toFixed(2)
+    })
+    
+    return monthlyStats
   },
 
   // 编辑收益记录
@@ -253,6 +349,9 @@ Page({
         mergedReturns.push(newReturn)
       }
     })
+    
+    // 确保数据按日期降序排序
+    mergedReturns.sort((a, b) => new Date(b.date) - new Date(a.date))
     
     allReturns[this.data.product.id] = mergedReturns
     wx.setStorageSync('FINANCE_DAILY_RETURNS', allReturns)
