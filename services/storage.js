@@ -1,5 +1,6 @@
 const BILL_KEY = 'BILL_LIST'
 const CATEGORY_KEY = 'CATEGORY_LIST'
+const request = require('../utils/request')
 
 // 默认分类数据
 const defaultCategories = [
@@ -13,19 +14,23 @@ const defaultCategories = [
 // 账单相关操作
 const billStorage = {
   // 获取账单列表
-  getBills() {
-    return wx.getStorageSync(BILL_KEY) || []
+  async getBills() {
+    try {
+      return await request.get('/bills')
+    } catch (error) {
+      console.error('获取账单失败:', error)
+      return []
+    }
   },
   
   // 添加账单
-  addBill(bill) {
-    const bills = this.getBills()
-    bills.unshift({
-      id: new Date().getTime(),
-      ...bill,
-      createTime: new Date().getTime()
-    })
-    wx.setStorageSync(BILL_KEY, bills)
+  async addBill(bill) {
+    try {
+      return await request.post('/bills', bill)
+    } catch (error) {
+      console.error('添加账单失败:', error)
+      throw error
+    }
   },
   
   // 删除账单
