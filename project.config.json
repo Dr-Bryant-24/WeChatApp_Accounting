@@ -7,6 +7,7 @@
   "miniprogramRoot": "",
   "compileType": "miniprogram",
   "projectname": "simple-bookkeeping",
+  "version": "1.0.2",
   "setting": {
     "urlCheck": true,
     "es6": true,

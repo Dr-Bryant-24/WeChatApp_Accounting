@@ -56,4 +56,9 @@
     <text class="icon">+</text>
     <text>添加理财产品</text>
   </view>
+
+  <!-- 在底部添加版本号显示 -->
+  <view class="version-info">
+    <text>v{{version}}</text>
+  </view>
 </view> 
