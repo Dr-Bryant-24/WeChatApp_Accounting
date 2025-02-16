@@ -274,11 +274,23 @@ Page({
           bottom: 30
         }
 
-        // 定义柱子的尺寸
+        // 计算柱子的尺寸和可显示数量
         const barWidth = 30
         const barSpacing = 20
         const totalBarWidth = barWidth + barSpacing
+        const visibleBars = Math.floor((canvasWidth - padding.left - padding.right) / totalBarWidth)
         
+        // 计算最大偏移量（使最新的数据显示在最右边）
+        const maxOffset = -((chartData.length - visibleBars) * totalBarWidth)
+        
+        // 如果没有设置偏移量（初始加载），则设置为最大偏移量，显示最新数据
+        if (!this.data.scrollOffsets[productId]) {
+          const scrollOffsets = { ...this.data.scrollOffsets }
+          scrollOffsets[productId] = maxOffset
+          this.setData({ scrollOffsets })
+          offset = maxOffset
+        }
+
         // 计算数据范围
         const visibleData = [...chartData].reverse()
         
