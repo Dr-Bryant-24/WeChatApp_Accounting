@@ -23,18 +23,4 @@
   <view class="save-btn {{canSave ? '' : 'disabled'}}" bindtap="saveDailyReturn">
     保存
   </view>
-
-  <!-- 历史记录 -->
-  <view class="history" wx:if="{{returns.length > 0}}">
-    <view class="history-title">历史记录</view>
-    <view class="history-list">
-      <view class="history-item" wx:for="{{returns}}" wx:key="id">
-        <view class="history-info">
-          <text class="history-date">{{item.date}}</text>
-          <text class="history-amount">¥{{item.amount}}</text>
-        </view>
-        <text class="history-remark" wx:if="{{item.remark}}">{{item.remark}}</text>
-      </view>
-    </view>
-  </view>
 </view> 

@@ -19,7 +19,7 @@ Page({
     dailyReturnPer10k: '0.0000'
   },
 
-  onLoad(options) {
+  async onLoad(options) {
     const { id } = options
     if (!id) {
       wx.showToast({
@@ -30,19 +30,29 @@ Page({
       return
     }
 
-    const product = financeStorage.getProduct(id)
-    if (!product) {
+    try {
+      // 改为使用异步方法获取产品信息
+      const product = await financeStorage.getProduct(id)
+      if (!product) {
+        wx.showToast({
+          title: '产品不存在',
+          icon: 'error'
+        })
+        wx.navigateBack()
+        return
+      }
+
+      this.setData({ product })
+      await this.loadProductDetail(id)
+      this.initDatePicker()
+    } catch (error) {
+      console.error('加载产品详情失败:', error)
       wx.showToast({
-        title: '产品不存在',
-        icon: 'error'
+        title: '加载失败',
+        icon: 'none'
       })
       wx.navigateBack()
-      return
     }
-
-    this.setData({ product })
-    this.loadProductDetail(id)
-    this.initDatePicker()
   },
 
   // 初始化日期选择器数据
@@ -71,60 +81,70 @@ Page({
     this.setData({ years, months, days })
   },
 
-  loadProductDetail(productId) {
-    const product = financeStorage.getProducts().find(p => p.id === Number(productId))
-    const returns = financeStorage.getDailyReturns(Number(productId))
-    
-    // 按日期降序排序
-    returns.sort((a, b) => new Date(b.date) - new Date(a.date))
-    
-    // 处理月度统计数据
-    const monthlyStats = this.calculateMonthlyStats(returns, product.amount)
-    
-    // 将月度统计数据插入到对应月份的最后一天之前
-    const processedReturns = []
-    
-    returns.forEach(item => {
-      const itemMonth = item.date.slice(0, 7)  // 获取年月 (YYYY-MM)
-      const monthOnly = itemMonth.slice(5)  // 只获取月份 (MM)
-      const itemDay = parseInt(item.date.slice(8, 10))  // 获取日期
+  async loadProductDetail(productId) {
+    try {
+      // 获取产品收益记录
+      const returns = await financeStorage.getDailyReturns(productId)
       
-      // 检查是否是月份的最后一天
-      const lastDayOfMonth = new Date(itemMonth + '-01')
-      lastDayOfMonth.setMonth(lastDayOfMonth.getMonth() + 1)
-      lastDayOfMonth.setDate(0)
-      const lastDay = lastDayOfMonth.getDate()
+      // 按日期降序排序，并确保日期格式只有年月日
+      returns.sort((a, b) => new Date(b.date) - new Date(a.date))
       
-      // 如果是月份的最后一天，添加月度统计
-      if (itemDay === lastDay && monthlyStats[itemMonth]) {
-        processedReturns.push({
-          id: `monthly-${itemMonth}`,
-          isMonthly: true,
-          month: monthOnly,  // 只使用月份
-          ...monthlyStats[itemMonth]
-        })
-      }
+      // 处理月度统计数据
+      const monthlyStats = this.calculateMonthlyStats(returns, this.data.product.amount)
       
-      processedReturns.push(item)
-    })
-    
-    // 重新计算所有统计数据
-    const totalReturn = returns.reduce((sum, r) => sum + r.amount, 0)
-    const averageReturn = returns.length > 0 ? (totalReturn / returns.length).toFixed(2) : '0.00'
-    
-    // 计算每万元日均收益和年化收益率
-    const dailyReturnPer10k = returns.length > 0 ? 
-      (Number(averageReturn) / product.amount * 10000) : 0
-    const annualizedRate = (dailyReturnPer10k * 365 / 10000 * 100).toFixed(2)
+      // 将月度统计数据插入到对应月份的最后一天之前
+      const processedReturns = []
+      
+      returns.forEach(item => {
+        // 确保日期格式只有年月日
+        const formattedItem = {
+          ...item,
+          date: item.date.split('T')[0] // 如果日期包含时间，去掉时间部分
+        }
+        
+        const itemMonth = formattedItem.date.slice(0, 7)  // 获取年月 (YYYY-MM)
+        const monthOnly = itemMonth.slice(5)  // 只获取月份 (MM)
+        const itemDay = parseInt(formattedItem.date.slice(8, 10))  // 获取日期
+        
+        // 检查是否是月份的最后一天
+        const lastDayOfMonth = new Date(itemMonth + '-01')
+        lastDayOfMonth.setMonth(lastDayOfMonth.getMonth() + 1)
+        lastDayOfMonth.setDate(0)
+        const lastDay = lastDayOfMonth.getDate()
+        
+        // 如果是月份的最后一天，添加月度统计
+        if (itemDay === lastDay && monthlyStats[itemMonth]) {
+          processedReturns.push({
+            id: `monthly-${itemMonth}`,
+            isMonthly: true,
+            month: monthOnly,
+            ...monthlyStats[itemMonth]
+          })
+        }
+        
+        processedReturns.push(formattedItem)
+      })
+      
+      // 重新计算所有统计数据
+      const totalReturn = returns.reduce((sum, r) => sum + r.amount, 0)
+      const averageReturn = returns.length > 0 ? (totalReturn / returns.length).toFixed(2) : '0.00'
+      
+      // 计算每万元日均收益和年化收益率
+      const dailyReturnPer10k = returns.length > 0 ? 
+        (Number(averageReturn) / this.data.product.amount * 10000) : 0
+      const annualizedRate = (dailyReturnPer10k * 365 / 10000 * 100).toFixed(2)
 
-    this.setData({
-      product,
-      returns: processedReturns,
-      averageReturn,
-      totalReturn: totalReturn.toFixed(2),
-      dailyReturnPer10k: dailyReturnPer10k.toFixed(4),
-      annualizedRate
-    })
+      this.setData({
+        returns: processedReturns,
+        averageReturn,
+        totalReturn: totalReturn.toFixed(2),
+        dailyReturnPer10k: dailyReturnPer10k.toFixed(4),
+        annualizedRate
+      })
+    } catch (error) {
+      console.error('加载产品详情失败:', error)
+      throw error
+    }
   },
 
   // 计算月度统计数据

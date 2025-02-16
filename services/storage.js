@@ -16,28 +16,33 @@ const billStorage = {
   // 获取账单列表
   async getBills() {
     try {
-      return await request.get('/bills')
+      const response = await request.get('/bills');
+      // 确保返回的是数组
+      return Array.isArray(response) ? response : [];
     } catch (error) {
-      console.error('获取账单失败:', error)
-      return []
+      console.error('获取账单失败:', error);
+      return [];
     }
   },
   
   // 添加账单
   async addBill(bill) {
     try {
-      return await request.post('/bills', bill)
+      return await request.post('/bills', bill);
     } catch (error) {
-      console.error('添加账单失败:', error)
-      throw error
+      console.error('添加账单失败:', error);
+      throw error;
     }
   },
   
   // 删除账单
-  deleteBill(id) {
-    const bills = this.getBills()
-    const newBills = bills.filter(bill => bill.id !== id)
-    wx.setStorageSync(BILL_KEY, newBills)
+  async deleteBill(id) {
+    try {
+      await request.delete(`/bills/${id}`);
+    } catch (error) {
+      console.error('删除账单失败:', error);
+      throw error;
+    }
   }
 }
 
@@ -45,22 +50,32 @@ const billStorage = {
 const categoryStorage = {
   // 获取分类列表
   getCategories() {
-    let categories = wx.getStorageSync(CATEGORY_KEY)
-    if (!categories) {
-      wx.setStorageSync(CATEGORY_KEY, defaultCategories)
-      categories = defaultCategories
+    try {
+      let categories = wx.getStorageSync(CATEGORY_KEY)
+      if (!categories) {
+        wx.setStorageSync(CATEGORY_KEY, defaultCategories)
+        categories = defaultCategories
+      }
+      return categories
+    } catch (error) {
+      console.error('获取分类失败:', error);
+      return defaultCategories;
     }
-    return categories
   },
   
   // 添加分类
   addCategory(category) {
-    const categories = this.getCategories()
-    categories.push({
-      id: new Date().getTime(),
-      ...category
-    })
-    wx.setStorageSync(CATEGORY_KEY, categories)
+    try {
+      const categories = this.getCategories()
+      categories.push({
+        id: new Date().getTime(),
+        ...category
+      })
+      wx.setStorageSync(CATEGORY_KEY, categories)
+    } catch (error) {
+      console.error('添加分类失败:', error);
+      throw error;
+    }
   }
 }
 

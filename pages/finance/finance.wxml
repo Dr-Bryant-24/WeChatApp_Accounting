@@ -13,26 +13,26 @@
 
   <!-- 理财产品列表 -->
   <view class="product-list">
-    <view class="product-item" wx:for="{{products}}" wx:key="id">
+    <view class="product-item" wx:for="{{products}}" wx:key="_id">
       <!-- 修改标题为可点击 -->
-      <view class="product-title" bindtap="navigateToDetail" data-id="{{item.id}}">
+      <view class="product-title" bindtap="navigateToDetail" data-id="{{item._id}}">
         {{item.name}}
       </view>
       
       <view class="product-header">
         <view class="product-actions">
-          <button class="btn" bindtap="addDailyReturn" data-id="{{item.id}}">记录</button>
-          <button class="btn delete" bindtap="deleteProduct" data-id="{{item.id}}">删除</button>
+          <button class="btn" bindtap="addDailyReturn" data-id="{{item._id}}">记录</button>
+          <button class="btn delete" bindtap="deleteProduct" data-id="{{item._id}}">删除</button>
         </view>
       </view>
 
       <!-- 收益图表 -->
       <view class="chart-container">
         <canvas class="product-chart" 
-                canvas-id="chart-{{item.id}}"
+                canvas-id="chart-{{item._id}}"
                 bindtouchstart="onChartTouchStart"
                 bindtouchend="onChartTouchEnd"
-                data-productid="{{item.id}}">
+                data-productid="{{item._id}}">
         </canvas>
         <view class="chart-hint">左右滑动查看更多数据</view>
       </view>

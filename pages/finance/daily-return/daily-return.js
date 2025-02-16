@@ -6,20 +6,20 @@ Page({
     date: '',
     amount: '',
     remark: '',
-    canSave: false,
-    returns: []
+    canSave: false
   },
 
   onLoad(options) {
     const { productId } = options
+    if (!productId) {
+      wx.showToast({
+        title: '产品ID无效',
+        icon: 'none'
+      })
+      wx.navigateBack()
+      return
+    }
     this.setData({ productId })
-    this.loadReturns()
-  },
-
-  // 加载历史收益记录
-  loadReturns() {
-    const returns = financeStorage.getDailyReturns(this.data.productId)
-    this.setData({ returns })
   },
 
   // 日期选择
@@ -53,29 +53,33 @@ Page({
   },
 
   // 保存每日收益
-  saveDailyReturn() {
+  async saveDailyReturn() {
     if (!this.data.canSave) return
 
-    const { productId, date, amount, remark } = this.data
-    financeStorage.addDailyReturn(productId, {
-      date,
-      amount: Number(amount),
-      remark: remark.trim()
-    })
+    try {
+      const { productId, date, amount, remark } = this.data
+      await financeStorage.addDailyReturn(productId, {
+        date,
+        amount: Number(amount),
+        remark: remark.trim()
+      })
 
-    wx.showToast({
-      title: '保存成功',
-      icon: 'success',
-      duration: 2000
-    })
+      wx.showToast({
+        title: '保存成功',
+        icon: 'success',
+        duration: 2000
+      })
 
-    // 重置表单并刷新列表
-    this.setData({
-      date: '',
-      amount: '',
-      remark: '',
-      canSave: false
-    })
-    this.loadReturns()
+      // 保存成功后返回上一页
+      setTimeout(() => {
+        wx.navigateBack()
+      }, 2000)
+    } catch (error) {
+      console.error('保存收益记录失败:', error)
+      wx.showToast({
+        title: '保存失败',
+        icon: 'none'
+      })
+    }
   }
 }) 

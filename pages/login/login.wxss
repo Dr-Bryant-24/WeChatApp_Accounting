@@ -1,0 +1,27 @@
+.container {
+  padding: 40rpx;
+}
+
+.form {
+  width: 100%;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 40rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.1);
+}
+
+input {
+  width: 100%;
+  height: 88rpx;
+  border: 2rpx solid #eee;
+  border-radius: 8rpx;
+  margin-bottom: 30rpx;
+  padding: 0 20rpx;
+  box-sizing: border-box;
+}
+
+button {
+  margin-top: 20rpx;
+  background: #1296db;
+  color: #fff;
+} 

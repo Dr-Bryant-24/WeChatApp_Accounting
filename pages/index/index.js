@@ -71,30 +71,57 @@ Page({
 
   },
 
-  loadBills() {
-    const bills = billStorage.getBills();
-    let totalExpense = 0;
-    let totalIncome = 0;
+  async loadBills() {
+    try {
+      // 改为 await 异步调用
+      const bills = await billStorage.getBills() || [];
+      
+      let totalExpense = 0;
+      let totalIncome = 0;
 
-    // 计算总收支
-    bills.forEach(bill => {
-      if (bill.type === 'expense') {
-        totalExpense += Number(bill.amount);
+      // 确保 bills 是数组
+      if (Array.isArray(bills)) {
+        // 计算总收支
+        bills.forEach(bill => {
+          if (bill.type === 'expense') {
+            totalExpense += Number(bill.amount);
+          } else {
+            totalIncome += Number(bill.amount);
+          }
+        });
+
+        // 格式化账单数据
+        const formattedBills = bills.map(bill => ({
+          ...bill,
+          date: formatTime(new Date(bill.createTime))
+        }));
+
+        this.setData({
+          bills: formattedBills,
+          totalExpense: totalExpense.toFixed(2),
+          totalIncome: totalIncome.toFixed(2)
+        });
       } else {
-        totalIncome += Number(bill.amount);
+        // 如果不是数组，设置为空数组
+        this.setData({
+          bills: [],
+          totalExpense: '0.00',
+          totalIncome: '0.00'
+        });
       }
-    });
-
-    // 格式化账单数据
-    const formattedBills = bills.map(bill => ({
-      ...bill,
-      date: formatTime(new Date(bill.createTime))
-    }));
-
-    this.setData({
-      bills: formattedBills,
-      totalExpense: totalExpense.toFixed(2),
-      totalIncome: totalIncome.toFixed(2)
-    });
+    } catch (error) {
+      console.error('加载账单失败:', error);
+      // 发生错误时也设置为空数组
+      this.setData({
+        bills: [],
+        totalExpense: '0.00',
+        totalIncome: '0.00'
+      });
+      
+      wx.showToast({
+        title: '加载失败',
+        icon: 'none'
+      });
+    }
   }
 })

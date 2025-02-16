@@ -21,74 +21,86 @@ Page({
   },
 
   // 加载理财产品列表
-  loadProducts() {
-    const products = financeStorage.getProducts()
-    const chartDataMap = {}
-    const currentPages = {}
-    const yAxisRanges = {}
-    
-    // 计算今日和本月总收益
-    const today = new Date()
-    const todayStr = today.toISOString().slice(0, 10)
-    const monthStr = today.toISOString().slice(0, 7)
-    
-    let todayTotal = 0
-    let monthTotal = 0
-    
-    // 处理每个产品的数据
-    const processedProducts = products.map(product => {
-      // 获取每个产品的收益记录并按日期降序排序
-      const returns = financeStorage.getDailyReturns(product.id)
-      returns.sort((a, b) => new Date(b.date) - new Date(a.date))
+  async loadProducts() {
+    try {
+      const products = await financeStorage.getProducts()
+      console.log('获取到的产品列表:', products)
+      const chartDataMap = {}
+      const currentPages = {}
+      const yAxisRanges = {}
       
-      // 计算今日收益
-      const todayReturn = returns.find(r => r.date === todayStr)
-      if (todayReturn) {
-        todayTotal += todayReturn.amount
-      }
+      // 计算今日和本月总收益
+      const today = new Date()
+      const todayStr = today.toISOString().slice(0, 10)
+      const monthStr = today.toISOString().slice(0, 7)
       
-      // 计算本月收益
-      const monthReturns = returns.filter(r => r.date.startsWith(monthStr))
-      monthTotal += monthReturns.reduce((sum, r) => sum + r.amount, 0)
+      let todayTotal = 0
+      let monthTotal = 0
       
-      // 计算平均日收益和累计收益
-      const totalReturn = returns.reduce((sum, r) => sum + r.amount, 0)
-      const averageReturn = returns.length > 0 ? (totalReturn / returns.length).toFixed(2) : '0.00'
-      
-      // 计算整体的Y轴范围
-      const allAmounts = returns.map(item => item.amount)
-      const maxAmount = Math.max(...allAmounts)
-      const minAmount = Math.min(...allAmounts)
-      const valueRange = maxAmount - minAmount
-      yAxisRanges[product.id] = {
-        max: valueRange === 0 ? maxAmount * 1.1 : maxAmount + valueRange * 0.1,
-        min: valueRange === 0 ? maxAmount * 0.9 : minAmount - valueRange * 0.1
-      }
-      
-      // 初始化每个产品的图表数据和页码
-      chartDataMap[product.id] = returns.slice(0, this.data.pageSize).reverse()
-      currentPages[product.id] = 0
+      // 处理每个产品的数据
+      const processedProducts = await Promise.all(products.map(async (product) => {
+        console.log('处理产品:', product)
+        
+        // 获取每个产品的收益记录并按日期降序排序
+        const returns = await financeStorage.getDailyReturns(product._id)
+        console.log('产品收益记录:', returns)
+        returns.sort((a, b) => new Date(b.date) - new Date(a.date))
+        
+        // 计算今日收益
+        const todayReturn = returns.find(r => r.date === todayStr)
+        if (todayReturn) {
+          todayTotal += todayReturn.amount
+        }
+        
+        // 计算本月收益
+        const monthReturns = returns.filter(r => r.date.startsWith(monthStr))
+        monthTotal += monthReturns.reduce((sum, r) => sum + r.amount, 0)
+        
+        // 计算平均日收益和累计收益
+        const totalReturn = returns.reduce((sum, r) => sum + r.amount, 0)
+        const averageReturn = returns.length > 0 ? (totalReturn / returns.length).toFixed(2) : '0.00'
+        
+        // 计算整体的Y轴范围
+        const allAmounts = returns.map(item => item.amount)
+        const maxAmount = Math.max(...allAmounts)
+        const minAmount = Math.min(...allAmounts)
+        const valueRange = maxAmount - minAmount
+        yAxisRanges[product._id] = {
+          max: valueRange === 0 ? maxAmount * 1.1 : maxAmount + valueRange * 0.1,
+          min: valueRange === 0 ? maxAmount * 0.9 : minAmount - valueRange * 0.1
+        }
+        
+        // 初始化每个产品的图表数据和页码
+        chartDataMap[product._id] = returns.slice(0, this.data.pageSize).reverse()
+        currentPages[product._id] = 0
 
-      // 返回添加了统计数据的产品对象
-      return {
-        ...product,
-        averageReturn,
-        totalReturn: totalReturn.toFixed(2)
-      }
-    })
+        // 返回添加了统计数据的产品对象
+        return {
+          ...product,
+          averageReturn,
+          totalReturn: totalReturn.toFixed(2)
+        }
+      }))
 
-    this.setData({
-      products: processedProducts,
-      chartDataMap,
-      currentPages,
-      yAxisRanges,
-      todayTotalReturn: todayTotal.toFixed(2),
-      monthTotalReturn: monthTotal.toFixed(2)
-    }, () => {
-      processedProducts.forEach(product => {
-        this.initChart(product.id)
+      this.setData({
+        products: processedProducts,
+        chartDataMap,
+        currentPages,
+        yAxisRanges,
+        todayTotalReturn: todayTotal.toFixed(2),
+        monthTotalReturn: monthTotal.toFixed(2)
+      }, () => {
+        processedProducts.forEach(product => {
+          this.initChart(product._id)
+        })
       })
-    })
+    } catch (error) {
+      console.error('加载产品列表失败:', error)
+      wx.showToast({
+        title: '加载失败',
+        icon: 'none'
+      })
+    }
   },
 
   // 跳转到添加理财产品页面
@@ -101,24 +113,38 @@ Page({
   // 跳转到记录每日收益页面
   addDailyReturn(e) {
     const { id } = e.currentTarget.dataset
+    console.log('添加收益的产品ID:', id)
+    
     wx.navigateTo({
       url: `/pages/finance/daily-return/daily-return?productId=${id}`
     })
   },
 
   // 删除理财产品
-  deleteProduct(e) {
+  async deleteProduct(e) {
     const { id } = e.currentTarget.dataset
-    wx.showModal({
-      title: '确认删除',
-      content: '删除后将无法恢复，是否继续？',
-      success: (res) => {
-        if (res.confirm) {
-          financeStorage.deleteProduct(id)
-          this.loadProducts()
-        }
-      }
-    })
+    
+    try {
+      await wx.showModal({
+        title: '确认删除',
+        content: '删除后数据无法恢复，确认删除吗？'
+      })
+      
+      await financeStorage.deleteProduct(id)
+      
+      wx.showToast({
+        title: '删除成功',
+        icon: 'success'
+      })
+      
+      this.loadProducts()
+    } catch (error) {
+      console.error('删除失败:', error)
+      wx.showToast({
+        title: '删除失败',
+        icon: 'none'
+      })
+    }
   },
 
   initChart(productId) {
@@ -210,6 +236,14 @@ Page({
       ctx.fill()
     })
 
+    // 格式化日期，只显示月-日
+    const formatDate = (dateStr) => {
+      const date = new Date(dateStr)
+      const month = (date.getMonth() + 1).toString().padStart(2, '0')
+      const day = date.getDate().toString().padStart(2, '0')
+      return `${month}-${day}`
+    }
+    
     // 绘制X轴标签
     ctx.setFontSize(10)
     ctx.setTextAlign('center')
@@ -217,11 +251,6 @@ Page({
     const minLabelSpacing = 50  // 标签之间的最小间距(px)
     const maxLabels = Math.floor(chartWidth / minLabelSpacing)  // 根据图表宽度计算最大标签数
     const labelStep = Math.max(1, Math.ceil(dates.length / maxLabels))
-    
-    // 格式化日期，只显示月-日
-    const formatDate = (dateStr) => {
-      return dateStr.slice(5)  // 从第5个字符开始截取，去掉年份
-    }
     
     dates.forEach((date, index) => {
       // 均匀显示标签，但最后一个日期要单独处理

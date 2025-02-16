@@ -1,69 +1,81 @@
+const request = require('../utils/request');
+
 const FINANCE_PRODUCTS_KEY = 'FINANCE_PRODUCTS'
 const DAILY_RETURNS_KEY = 'FINANCE_DAILY_RETURNS'
 
 const financeStorage = {
   // 获取单个理财产品
-  getProduct(id) {
-    const products = this.getProducts()
-    return products.find(p => p.id === Number(id))
+  async getProduct(id) {
+    try {
+      const products = await this.getProducts();
+      return products.find(p => p._id === id);
+    } catch (error) {
+      console.error('获取产品失败:', error);
+      return null;
+    }
   },
 
   // 获取所有理财产品
-  getProducts() {
-    return wx.getStorageSync(FINANCE_PRODUCTS_KEY) || []
+  async getProducts() {
+    try {
+      const response = await request.get('/finance/products')
+      console.log('API返回的产品列表:', response)
+      return Array.isArray(response) ? response : []
+    } catch (error) {
+      console.error('获取产品列表失败:', error)
+      return []
+    }
   },
 
   // 添加理财产品
-  addProduct(product) {
-    const products = this.getProducts()
-    const newProduct = {
-      id: new Date().getTime(),
-      ...product,
-      createTime: new Date().getTime()
+  async addProduct(product) {
+    try {
+      return await request.post('/finance/products', product);
+    } catch (error) {
+      console.error('添加产品失败:', error);
+      throw error;
     }
-    products.push(newProduct)
-    wx.setStorageSync(FINANCE_PRODUCTS_KEY, products)
-    return newProduct
   },
 
   // 删除理财产品
-  deleteProduct(productId) {
-    const products = this.getProducts()
-    const newProducts = products.filter(p => p.id !== productId)
-    wx.setStorageSync(FINANCE_PRODUCTS_KEY, newProducts)
-    // 同时删除该产品的所有收益记录
-    this.deleteDailyReturnsByProduct(productId)
+  async deleteProduct(productId) {
+    try {
+      await request.delete(`/finance/products/${productId}`);
+      // 删除产品时，后端会自动删除相关的收益记录
+    } catch (error) {
+      console.error('删除产品失败:', error);
+      throw error;
+    }
   },
 
   // 获取某个产品的所有每日收益记录
-  getDailyReturns(productId) {
-    const allReturns = wx.getStorageSync(DAILY_RETURNS_KEY) || {}
-    return allReturns[productId] || []
+  async getDailyReturns(productId) {
+    try {
+      console.log('获取收益记录的产品ID:', productId)
+      if (!productId) {
+        console.error('产品ID未定义')
+        return []
+      }
+      const returns = await request.get(`/finance/products/${productId}/returns`)
+      return Array.isArray(returns) ? returns : []
+    } catch (error) {
+      console.error('获取收益记录失败:', error)
+      return []
+    }
   },
 
   // 添加每日收益记录
-  addDailyReturn(productId, returnData) {
-    const allReturns = wx.getStorageSync(DAILY_RETURNS_KEY) || {}
-    const productReturns = allReturns[productId] || []
-    
-    const newReturn = {
-      id: new Date().getTime(),
-      ...returnData,
-      createTime: new Date().getTime()
+  async addDailyReturn(productId, returnData) {
+    try {
+      console.log('添加收益记录:', { productId, returnData })
+      if (!productId) {
+        throw new Error('产品ID未定义')
+      }
+      return await request.post(`/finance/products/${productId}/returns`, returnData)
+    } catch (error) {
+      console.error('添加收益记录失败:', error)
+      throw error
     }
-    
-    productReturns.push(newReturn)
-    allReturns[productId] = productReturns.sort((a, b) => new Date(a.date) - new Date(b.date))
-    
-    wx.setStorageSync(DAILY_RETURNS_KEY, allReturns)
-    return newReturn
-  },
-
-  // 删除某个产品的所有收益记录
-  deleteDailyReturnsByProduct(productId) {
-    const allReturns = wx.getStorageSync(DAILY_RETURNS_KEY) || {}
-    delete allReturns[productId]
-    wx.setStorageSync(DAILY_RETURNS_KEY, allReturns)
   },
 
   // 计算某个产品的平均每日收益
