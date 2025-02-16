@@ -1,19 +1,26 @@
 <!--pages/index/index.wxml-->
-<view class="container">
-  <!-- 顶部统计 -->
-  <view class="header">
-    <view class="month-select">
-      <text class="month">{{currentMonth}}月</text>
-      <text class="year">{{currentYear}}</text>
+<view class="page">
+  <!-- 顶部卡片 -->
+  <view class="header-card">
+    <view class="month-picker">
+      <picker mode="date" fields="month" value="{{currentDate}}" bindchange="dateChange">
+        <view class="picker-content">
+          <text class="year">{{currentYear}}</text>
+          <text class="month">{{currentMonth}}月</text>
+          <text class="picker-arrow">›</text>
+        </view>
+      </picker>
     </view>
-    <view class="amount-info">
-      <view class="expense">
-        <text class="label">支出</text>
-        <text class="amount">¥{{totalExpense}}</text>
+
+    <view class="overview">
+      <view class="overview-item">
+        <text class="label">本月支出</text>
+        <text class="amount expense">¥{{totalExpense}}</text>
       </view>
-      <view class="income">
-        <text class="label">收入</text>
-        <text class="amount">¥{{totalIncome}}</text>
+      <view class="divider"></view>
+      <view class="overview-item">
+        <text class="label">本月收入</text>
+        <text class="amount income">¥{{totalIncome}}</text>
       </view>
     </view>
   </view>
@@ -21,17 +28,43 @@
   <!-- 账单列表 -->
   <view class="bill-list">
     <block wx:for="{{bills}}" wx:key="id">
-      <view class="bill-item">
-        <view class="left">
-          <view class="category">{{item.category}}</view>
-          <view class="date">{{item.date}}</view>
+      <!-- 日期分组 -->
+      <block wx:if="{{item.showDate}}">
+        <view class="date-header">
+          <text class="date-text">{{item.date}}</text>
+          <view class="date-summary">
+            <text class="expense">支出 ¥{{item.dayExpense}}</text>
+            <text class="income">收入 ¥{{item.dayIncome}}</text>
+          </view>
         </view>
-        <view class="right">
-          <text class="amount {{item.type === 'expense' ? 'expense' : 'income'}}">
-            {{item.type === 'expense' ? '-' : '+'}}¥{{item.amount}}
-          </text>
+      </block>
+
+      <!-- 账单项 -->
+      <view class="bill-item">
+        <view class="category-info">
+          <view class="icon-wrap {{item.type}}">
+            <text class="icon">{{item.icon}}</text>
+          </view>
+          <view class="bill-detail">
+            <text class="category-name">{{item.category}}</text>
+            <text class="time">{{item.time}}</text>
+          </view>
+        </view>
+        <view class="amount-info {{item.type}}">
+          <text>{{item.type === 'expense' ? '-' : '+'}}¥{{item.amount}}</text>
         </view>
       </view>
     </block>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{!bills.length}}">
+    <text class="empty-text">本月暂无账单</text>
+    <text class="empty-tip">点击右下角添加一笔账单吧</text>
+  </view>
+
+  <!-- 添加按钮 -->
+  <view class="add-button" bindtap="navigateToAdd">
+    <text class="add-icon">+</text>
   </view>
 </view>

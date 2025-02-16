@@ -1,39 +1,78 @@
 <!--pages/add/add.wxml-->
-<view class="container">
-  <!-- 类型切换 -->
-  <view class="type-switch">
-    <view class="type-item {{type === 'expense' ? 'active' : ''}}" bindtap="switchType" data-type="expense">支出</view>
-    <view class="type-item {{type === 'income' ? 'active' : ''}}" bindtap="switchType" data-type="income">收入</view>
+<view class="page">
+  <!-- 顶部金额输入区 -->
+  <view class="amount-header {{type}}">
+    <view class="type-switch">
+      <view class="switch-item {{type === 'expense' ? 'active' : ''}}" bindtap="switchType" data-type="expense">支出</view>
+      <view class="switch-item {{type === 'income' ? 'active' : ''}}" bindtap="switchType" data-type="income">收入</view>
+      <view class="switch-slider {{type}}"></view>
+    </view>
+    <view class="amount-area">
+      <text class="currency-symbol">¥</text>
+      <input 
+        class="amount-input"
+        type="digit" 
+        value="{{amount}}" 
+        bindinput="onAmountInput" 
+        placeholder="0.00"
+        placeholder-class="input-placeholder"
+      />
+    </view>
   </view>
 
-  <!-- 金额输入 -->
-  <view class="amount-input">
-    <text class="currency">¥</text>
-    <input type="digit" value="{{amount}}" bindinput="onAmountInput" placeholder="0.00"/>
-  </view>
-
-  <!-- 分类选择 -->
-  <view class="category-list">
-    <view class="category-title">选择分类</view>
+  <!-- 主要内容区 -->
+  <view class="content">
+    <!-- 分类选择 -->
+    <view class="section-title">选择分类</view>
     <view class="category-grid">
       <view class="category-item {{selectedCategory.id === item.id ? 'active' : ''}}" 
-            wx:for="{{categories}}" 
-            wx:key="id"
-            bindtap="selectCategory"
-            data-category="{{item}}">
-        <view class="category-icon">{{item.icon}}</view>
-        <view class="category-name">{{item.name}}</view>
+        wx:for="{{categories}}" 
+        wx:key="id"
+        bindtap="selectCategory"
+        data-category="{{item}}">
+        <view class="icon-wrap">
+          <text class="icon">{{item.icon}}</text>
+        </view>
+        <text class="name">{{item.name}}</text>
+      </view>
+    </view>
+
+    <!-- 账单信息 -->
+    <view class="bill-info">
+      <view class="info-item">
+        <view class="item-label">
+          <text class="label-icon">🗓</text>
+          <text>记账日期</text>
+        </view>
+        <picker mode="date" value="{{date}}" bindchange="onDateChange">
+          <view class="item-value">
+            <text>{{date || '今天'}}</text>
+            <text class="arrow">›</text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="info-item">
+        <view class="item-label">
+          <text class="label-icon">📝</text>
+          <text>备注信息</text>
+        </view>
+        <input 
+          class="remark-input"
+          type="text" 
+          value="{{remark}}" 
+          bindinput="onRemarkInput" 
+          placeholder="添加备注"
+          placeholder-class="input-placeholder"
+        />
       </view>
     </view>
   </view>
 
-  <!-- 备注输入 -->
-  <view class="remark-input">
-    <input type="text" value="{{remark}}" bindinput="onRemarkInput" placeholder="添加备注"/>
-  </view>
-
-  <!-- 保存按钮 -->
-  <view class="save-btn {{canSave ? '' : 'disabled'}}" bindtap="saveBill">
-    保存
+  <!-- 底部保存按钮 -->
+  <view class="footer">
+    <button class="save-button {{!canSave ? 'disabled' : ''}}" bindtap="saveBill">
+      保存账单
+    </button>
   </view>
 </view>

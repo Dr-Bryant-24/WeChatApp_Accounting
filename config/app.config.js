@@ -1,5 +1,5 @@
 const appConfig = {
-  version: '1.0.7',
+  version: '1.1.0',
   versionCode: 1,
   buildDate: '2025-02-16',
   appName: '理财记账本'

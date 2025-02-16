@@ -1,29 +1,59 @@
 /* pages/statistics/statistics.wxss */
 .container {
   padding: 30rpx;
-  background-color: #f5f5f5;
+  background-color: #f7f7f7;
   min-height: 100vh;
 }
 
-.time-select {
-  background: #fff;
-  padding: 30rpx;
-  border-radius: 10rpx;
-  margin-bottom: 30rpx;
-  text-align: center;
-}
-
-.picker {
-  font-size: 32rpx;
-  color: #333;
-}
-
-.overview {
+/* 月份选择器 */
+.month-selector {
   display: flex;
-  background: #fff;
-  padding: 30rpx;
-  border-radius: 10rpx;
+  justify-content: center;
+  align-items: center;
+  background: white;
+  padding: 20rpx;
+  border-radius: 16rpx;
   margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.month-btn {
+  padding: 10rpx 30rpx;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.month-btn:active {
+  opacity: 0.7;
+}
+
+.current-month {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+  padding: 0 40rpx;
+}
+
+/* 总览卡片 */
+.overview-card {
+  background: linear-gradient(135deg, #43cea2, #185a9d);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  color: white;
+  box-shadow: 0 4rpx 20rpx rgba(67, 206, 162, 0.2);
+}
+
+.overview-header {
+  font-size: 28rpx;
+  opacity: 0.9;
+  margin-bottom: 20rpx;
+}
+
+.overview-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .overview-item {
@@ -31,36 +61,48 @@
   text-align: center;
 }
 
-.overview-item .label {
-  font-size: 28rpx;
-  color: #666;
+.divider {
+  width: 2rpx;
+  height: 60rpx;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.label {
+  font-size: 26rpx;
+  opacity: 0.8;
+  display: block;
   margin-bottom: 10rpx;
+}
+
+.amount {
+  font-size: 40rpx;
+  font-weight: 600;
+}
+
+/* 统计卡片 */
+.stats-card {
+  background: white;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+  margin-bottom: 30rpx;
+}
+
+.title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
   display: block;
 }
 
-.overview-item .amount {
-  font-size: 36rpx;
-  font-weight: bold;
-}
-
-.amount.expense {
-  color: #f5222d;
-}
-
-.amount.income {
-  color: #52c41a;
-}
-
-.category-stats {
-  background: #fff;
-  padding: 30rpx;
-  border-radius: 10rpx;
-}
-
-.stats-title {
-  font-size: 32rpx;
-  color: #333;
-  margin-bottom: 30rpx;
+.subtitle {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 6rpx;
+  display: block;
 }
 
 .stats-item {
@@ -70,33 +112,66 @@
 .category-info {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10rpx;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+
+.category-left {
+  display: flex;
+  align-items: center;
+}
+
+.category-icon {
+  width: 64rpx;
+  height: 64rpx;
+  background: #f0f9f6;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 16rpx;
+  font-size: 32rpx;
+}
+
+.category-detail {
+  display: flex;
+  flex-direction: column;
 }
 
 .category-name {
   font-size: 28rpx;
+  color: #333;
+  margin-bottom: 4rpx;
+}
+
+.category-amount {
+  font-size: 24rpx;
   color: #666;
 }
 
 .category-percent {
   font-size: 28rpx;
-  color: #999;
+  color: #43cea2;
+  font-weight: 500;
 }
 
 .progress-bar {
-  background: #f0f0f0;
-  height: 10rpx;
-  border-radius: 5rpx;
-  margin-bottom: 10rpx;
+  background: #f5f5f5;
+  height: 6rpx;
+  border-radius: 3rpx;
+  overflow: hidden;
 }
 
 .progress {
-  background: #1296db;
   height: 100%;
-  border-radius: 5rpx;
+  border-radius: 3rpx;
+  transition: width 0.3s ease;
 }
 
-.stats-item .amount {
-  font-size: 28rpx;
-  color: #333;
+.amount.expense {
+  color: #f5222d;
+}
+
+.amount.income {
+  color: #52c41a;
 }

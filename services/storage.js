@@ -4,11 +4,22 @@ const request = require('../utils/request')
 
 // 默认分类数据
 const defaultCategories = [
-  { id: 1, name: '餐饮', icon: 'food', type: 'expense' },
-  { id: 2, name: '交通', icon: 'car', type: 'expense' },
-  { id: 3, name: '购物', icon: 'shopping', type: 'expense' },
-  { id: 4, name: '工资', icon: 'salary', type: 'income' },
-  { id: 5, name: '兼职', icon: 'part-time', type: 'income' }
+  // 支出分类
+  { id: 1, name: '餐饮', icon: '🍱', type: 'expense' },
+  { id: 2, name: '交通', icon: '🚊', type: 'expense' },
+  { id: 3, name: '购物', icon: '🛍️', type: 'expense' },
+  { id: 4, name: '娱乐', icon: '🎮', type: 'expense' },
+  { id: 5, name: '居住', icon: '🏠', type: 'expense' },
+  { id: 6, name: '医疗', icon: '💊', type: 'expense' },
+  { id: 7, name: '教育', icon: '📚', type: 'expense' },
+  { id: 8, name: '日用', icon: '🧴', type: 'expense' },
+  
+  // 收入分类
+  { id: 9, name: '工资', icon: '💵', type: 'income' },
+  { id: 10, name: '兼职', icon: '💼', type: 'income' },
+  { id: 11, name: '理财', icon: '📈', type: 'income' },
+  { id: 12, name: '奖金', icon: '🎁', type: 'income' },
+  { id: 13, name: '退款', icon: '🔄', type: 'income' }
 ]
 
 // 账单相关操作
@@ -16,12 +27,11 @@ const billStorage = {
   // 获取账单列表
   async getBills() {
     try {
-      const response = await request.get('/bills');
-      // 确保返回的是数组
-      return Array.isArray(response) ? response : [];
+      const bills = wx.getStorageSync('BILLS') || []
+      return Array.isArray(bills) ? bills : []
     } catch (error) {
-      console.error('获取账单失败:', error);
-      return [];
+      console.error('获取账单失败:', error)
+      return []
     }
   },
   
@@ -75,6 +85,17 @@ const categoryStorage = {
     } catch (error) {
       console.error('添加分类失败:', error);
       throw error;
+    }
+  },
+
+  // 重置分类列表
+  resetCategories() {
+    try {
+      wx.setStorageSync(CATEGORY_KEY, defaultCategories)
+      return defaultCategories
+    } catch (error) {
+      console.error('重置分类失败:', error)
+      return defaultCategories
     }
   }
 }

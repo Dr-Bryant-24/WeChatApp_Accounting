@@ -86,38 +86,93 @@ Page({
     this.loadStats()
   },
 
-  // 加载统计数据
-  loadStats() {
-    const bills = billStorage.getBills()
-    let totalExpense = 0
-    let totalIncome = 0
-    const categoryExpense = {}
-
-    // 筛选当月账单并统计
-    bills.forEach(bill => {
-      const billDate = new Date(bill.createTime)
-      if (billDate.getFullYear() === this.data.currentYear && 
-          billDate.getMonth() + 1 === this.data.currentMonth) {
-        if (bill.type === 'expense') {
-          totalExpense += Number(bill.amount)
-          categoryExpense[bill.category] = (categoryExpense[bill.category] || 0) + Number(bill.amount)
-        } else {
-          totalIncome += Number(bill.amount)
-        }
-      }
-    })
-
-    // 计算支出分类统计
-    const expenseStats = Object.entries(categoryExpense).map(([category, amount]) => ({
-      category,
-      amount: amount.toFixed(2),
-      percent: totalExpense ? Math.round(amount / totalExpense * 100) : 0
-    })).sort((a, b) => b.amount - a.amount)
-
+  // 上个月
+  prevMonth() {
+    let { currentYear, currentMonth } = this.data
+    if (currentMonth === 1) {
+      currentMonth = 12
+      currentYear--
+    } else {
+      currentMonth--
+    }
     this.setData({
-      totalExpense: totalExpense.toFixed(2),
-      totalIncome: totalIncome.toFixed(2),
-      expenseStats
+      currentYear,
+      currentMonth,
+      currentDate: `${currentYear}-${String(currentMonth).padStart(2, '0')}`
     })
+    this.loadStats()
+  },
+
+  // 下个月
+  nextMonth() {
+    let { currentYear, currentMonth } = this.data
+    if (currentMonth === 12) {
+      currentMonth = 1
+      currentYear++
+    } else {
+      currentMonth++
+    }
+    this.setData({
+      currentYear,
+      currentMonth,
+      currentDate: `${currentYear}-${String(currentMonth).padStart(2, '0')}`
+    })
+    this.loadStats()
+  },
+
+  // 加载统计数据
+  async loadStats() {
+    try {
+      const bills = await billStorage.getBills()
+      
+      // 确保 bills 是数组
+      if (!Array.isArray(bills)) {
+        console.error('账单数据不是数组:', bills)
+        this.setData({
+          totalExpense: '0.00',
+          totalIncome: '0.00',
+          expenseStats: []
+        })
+        return
+      }
+
+      let totalExpense = 0
+      let totalIncome = 0
+      const categoryExpense = {}
+
+      // 筛选当月账单并统计
+      bills.forEach(bill => {
+        const billDate = new Date(bill.createTime)
+        if (billDate.getFullYear() === this.data.currentYear && 
+            billDate.getMonth() + 1 === this.data.currentMonth) {
+          if (bill.type === 'expense') {
+            totalExpense += Number(bill.amount)
+            categoryExpense[bill.category] = (categoryExpense[bill.category] || 0) + Number(bill.amount)
+          } else {
+            totalIncome += Number(bill.amount)
+          }
+        }
+      })
+
+      // 计算支出分类统计
+      const expenseStats = Object.entries(categoryExpense).map(([category, amount]) => ({
+        category,
+        amount: amount.toFixed(2),
+        percent: totalExpense ? Math.round(amount / totalExpense * 100) : 0
+      })).sort((a, b) => b.amount - a.amount)
+
+      this.setData({
+        totalExpense: totalExpense.toFixed(2),
+        totalIncome: totalIncome.toFixed(2),
+        expenseStats
+      })
+
+    } catch (error) {
+      console.error('加载统计数据失败:', error)
+      wx.showToast({
+        title: '加载失败',
+        icon: 'none'
+      })
+    }
   }
 })
