@@ -1,54 +1,78 @@
 <view class="container">
+  <!-- 产品信息卡片 -->
   <view class="product-info">
-    <view class="info-item">
-      <text class="label">产品名称</text>
-      <text class="value">{{product.name}}</text>
-    </view>
-    <view class="info-item">
-      <text class="label">投入金额</text>
-      <text class="value green">¥{{product.amount}}</text>
-    </view>
-    <view class="info-item">
-      <text class="label">平均日收益</text>
-      <text class="value blue">¥{{averageReturn}}</text>
-    </view>
-    <view class="info-item">
-      <text class="label">累计收益</text>
-      <text class="value blue">¥{{totalReturn}}</text>
-    </view>
-    <view class="info-item">
-      <text class="label">每万元日均收益</text>
-      <text class="value red">¥{{dailyReturnPer10k}}</text>
-    </view>
-    <view class="info-item">
-      <text class="label">年化收益率</text>
-      <text class="value red">{{annualizedRate}}%</text>
+    <view class="product-name">{{product.name}}</view>
+    <view class="stats-grid">
+      <view class="stat-item">
+        <view class="stat-label">投入金额</view>
+        <view class="stat-value">¥{{product.amount}}</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-label">累计天数</view>
+        <view class="stat-value">{{totalDays}}天</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-label">平均日收益</view>
+        <view class="stat-value">¥{{averageReturn}}</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-label">累计收益</view>
+        <view class="stat-value">¥{{totalReturn}}</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-label">年化收益率</view>
+        <view class="stat-value">{{annualizedRate}}%</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-label">万份收益</view>
+        <view class="stat-value">¥{{dailyReturnPer10k}}</view>
+      </view>
     </view>
   </view>
 
-  <view class="returns-table">
-    <view class="table-header">
-      <view class="th">日期</view>
-      <view class="th">收益金额</view>
-      <view class="th">备注</view>
+  <!-- 收益记录列表 -->
+  <view class="returns-list">
+    <view class="list-header">
+      <text class="list-title">收益记录</text>
+      <view class="import-btn" bindtap="importFromText">批量导入</view>
     </view>
-    <view class="table-body">
-      <block wx:for="{{returns}}" wx:key="id">
-        <block wx:if="{{item.isMonthly}}">
-          <view class="tr monthly-stats">
-            <text>{{item.month}}月</text>
-            <text class="monthly-rate">年化收益率: <text class="rate-value">{{item.annualizedRate}}%</text></text>
-            <text class="monthly-return">累计收益: <text class="return-value">¥{{item.totalReturn}}</text></text>
+
+    <block wx:if="{{returns.length > 0}}">
+      <block wx:for="{{returns}}" wx:key="date">
+        <!-- 月度总结 -->
+        <view class="monthly-summary" wx:if="{{item.isMonthly}}">
+          <view class="summary-header">
+            <text class="month-text">{{item.month}}月总结</text>
+            <view class="summary-divider"></view>
           </view>
-        </block>
-        <block wx:else>
-          <view class="tr" bindtap="editReturn" data-return="{{item}}">
-            <view class="td">{{item.date}}</view>
-            <view class="td">¥{{item.amount}}</view>
-            <view class="td">{{item.remark || '-'}}</view>
+          <view class="summary-content">
+            <view class="summary-item">
+              <text class="summary-label">月度收益</text>
+              <text class="summary-value">¥{{item.totalReturn}}</text>
+            </view>
+            <view class="summary-item">
+              <text class="summary-label">年化收益率</text>
+              <text class="summary-value rate">{{item.annualizedRate}}%</text>
+            </view>
           </view>
-        </block>
+        </view>
+
+        <!-- 日常收益记录 -->
+        <view class="return-item" wx:else bindtap="showActionSheet" data-return="{{item}}">
+          <view class="return-left">
+            <view class="return-date">{{item.date}}</view>
+            <view class="return-remark" wx:if="{{item.remark}}">{{item.remark}}</view>
+          </view>
+          <view class="return-info">
+            <text class="return-amount">¥{{item.amount}}</text>
+          </view>
+        </view>
       </block>
+    </block>
+    
+    <view class="empty-state" wx:else>
+      <view class="empty-icon">📊</view>
+      <view class="empty-text">暂无收益记录</view>
     </view>
   </view>
 
@@ -73,9 +97,5 @@
         </picker-view-column>
       </picker-view>
     </view>
-  </view>
-
-  <view class="import-section">
-    <button class="import-btn" bindtap="importFromText">批量导入收益记录</button>
   </view>
 </view> 

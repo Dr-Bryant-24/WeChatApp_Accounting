@@ -1,14 +1,161 @@
 .container {
-  padding: 30rpx;
-  background-color: #f5f5f5;
+  padding: 20rpx;
+  background-color: #f7f7f7;
   min-height: 100vh;
 }
 
+/* 产品信息卡片 */
 .product-info {
-  background: #fff;
-  padding: 30rpx;
-  border-radius: 10rpx;
+  background: linear-gradient(135deg, #43cea2, #185a9d);
+  padding: 40rpx 30rpx;
+  border-radius: 24rpx;
   margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(67, 206, 162, 0.2);
+  color: white;
+}
+
+.product-name {
+  font-size: 40rpx;
+  font-weight: 600;
+  margin-bottom: 30rpx;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+
+.stat-item {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 20rpx;
+  border-radius: 16rpx;
+  backdrop-filter: blur(10px);
+  transition: transform 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-item:active {
+  transform: scale(0.98);
+}
+
+.stat-label {
+  font-size: 24rpx;
+  opacity: 0.9;
+  margin-bottom: 10rpx;
+}
+
+.stat-value {
+  font-size: 34rpx;
+  font-weight: 600;
+  text-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.1);
+}
+
+/* 收益记录列表 */
+.returns-list {
+  background: white;
+  border-radius: 20rpx;
+  padding: 20rpx 24rpx;
+  margin: 0 16rpx 20rpx;
+  box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+  padding: 0 6rpx;
+}
+
+.list-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.import-btn {
+  background: #3A7BD5;
+  color: white;
+  padding: 12rpx 24rpx;
+  border-radius: 30rpx;
+  font-size: 24rpx;
+  box-shadow: 0 2rpx 8rpx rgba(58, 123, 213, 0.2);
+}
+
+/* 收益记录项样式优化 */
+.return-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 6rpx;
+  border-bottom: 1px solid #f5f5f5;
+  margin: 0 -6rpx;
+  transition: background-color 0.2s ease;
+  position: relative;
+}
+
+.return-item:active {
+  background-color: #f8f8f8;
+}
+
+.return-item::after {
+  content: '';
+  position: absolute;
+  right: 12rpx;
+  top: 50%;
+  width: 12rpx;
+  height: 12rpx;
+  border-right: 2rpx solid #ccc;
+  border-bottom: 2rpx solid #ccc;
+  transform: translateY(-50%) rotate(-45deg);
+  opacity: 0.6;
+}
+
+.return-info {
+  display: flex;
+  align-items: center;
+  padding-right: 30rpx;
+}
+
+.return-date {
+  color: #666;
+  font-size: 26rpx;
+}
+
+.return-remark {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 8rpx;
+}
+
+.return-amount {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #FF914D;
+}
+
+/* 移除正负金额不同颜色的样式 */
+.return-amount.positive,
+.return-amount.negative {
+  color: #FF914D;
+}
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: 40rpx 0;
+  color: #999;
+}
+
+.empty-icon {
+  font-size: 72rpx;
+  margin-bottom: 16rpx;
+}
+
+.empty-text {
+  font-size: 26rpx;
 }
 
 .info-item {
@@ -166,13 +313,6 @@
   padding: 0 30rpx;
 }
 
-.import-btn {
-  background: #1296db;
-  color: #fff;
-  font-size: 28rpx;
-  border-radius: 10rpx;
-}
-
 .monthly-stats {
   background-color: #f8f8f8;
   padding: 20rpx;
@@ -202,4 +342,68 @@
 /* 禁用月度统计行的点击效果 */
 .monthly-stats:active {
   background-color: #f8f8f8;
+}
+
+/* 月度总结样式 */
+.monthly-summary {
+  margin: 24rpx -6rpx;
+  background: #f8faff;
+  border-radius: 16rpx;
+  padding: 20rpx;
+}
+
+.summary-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.month-text {
+  font-size: 28rpx;
+  color: #3A7BD5;
+  font-weight: 600;
+  margin-right: 16rpx;
+}
+
+.summary-divider {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, rgba(58, 123, 213, 0.2), transparent);
+}
+
+.summary-content {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16rpx;
+}
+
+.summary-item {
+  padding: 12rpx;
+}
+
+.summary-label {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 8rpx;
+}
+
+.summary-value {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #3A7BD5;
+}
+
+.summary-value.rate {
+  color: #FF914D;
+}
+
+/* 当月度总结后的第一个收益记录项不需要上边框 */
+.monthly-summary + .return-item {
+  border-top: none;
+  padding-top: 30rpx;
+}
+
+/* 移除之前的删除按钮相关样式 */
+.delete-btn {
+  display: none;
 } 
