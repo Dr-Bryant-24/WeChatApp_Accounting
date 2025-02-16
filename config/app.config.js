@@ -1,3 +1,10 @@
+const appConfig = {
+  version: '1.0.7',
+  versionCode: 1,
+  buildDate: '2025-02-16',
+  appName: '理财记账本'
+}
+
 const config = {
   // 使用配置区分开发和生产环境
   development: {
@@ -18,5 +25,6 @@ const isDev = () => {
 
 // 导出配置
 module.exports = {
-  baseUrl: config.development.baseUrl  // 统一使用 HTTPS 地址
+  baseUrl: config.development.baseUrl,  // 统一使用 HTTPS 地址
+  appConfig  // 添加 appConfig 导出
 } 

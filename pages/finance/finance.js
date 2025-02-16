@@ -1,5 +1,6 @@
 const { financeStorage } = require('../../services/finance')
 const wxCharts = require('../../utils/wxcharts')
+const { appConfig } = require('../../config/app.config')
 
 Page({
   data: {
@@ -9,7 +10,8 @@ Page({
     pageSize: 30,
     yAxisRanges: {},
     todayTotalReturn: '0.00',
-    monthTotalReturn: '0.00'
+    monthTotalReturn: '0.00',
+    version: appConfig.version
   },
 
   onLoad() {
