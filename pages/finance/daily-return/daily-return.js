@@ -2,7 +2,7 @@ const { financeStorage } = require('../../../services/finance')
 
 Page({
   data: {
-    productId: '',
+    product: null,
     date: '',
     amount: '',
     remark: '',
@@ -20,10 +20,49 @@ Page({
       return
     }
     this.setData({ productId })
+    this.loadProduct(productId)
+    // 默认设置为今天的日期
+    this.setToday()
   },
 
-  // 日期选择
-  onDateChange(e) {
+  async loadProduct(productId) {
+    try {
+      const product = await financeStorage.getProduct(productId)
+      this.setData({ product })
+    } catch (error) {
+      console.error('加载产品信息失败:', error)
+      wx.showToast({
+        title: '加载失败',
+        icon: 'none'
+      })
+    }
+  },
+
+  // 设置为今天日期
+  setToday() {
+    const today = new Date()
+    const date = today.toISOString().split('T')[0]
+    this.setData({ date })
+  },
+
+  // 设置为昨天日期
+  setYesterday() {
+    const yesterday = new Date()
+    yesterday.setDate(yesterday.getDate() - 1)
+    const date = yesterday.toISOString().split('T')[0]
+    this.setData({ date })
+  },
+
+  // 清空金额
+  clearAmount() {
+    this.setData({ 
+      amount: '',
+      remark: ''
+    })
+  },
+
+  // 日期选择器改变
+  bindDateChange(e) {
     this.setData({
       date: e.detail.value
     })
@@ -31,15 +70,25 @@ Page({
   },
 
   // 金额输入
-  onAmountInput(e) {
+  bindAmountInput(e) {
+    let value = e.detail.value
+    // 限制只能输入数字和小数点，且只能有两位小数
+    value = value.replace(/[^\d.]/g, '')
+    if (value.indexOf('.') > -1) {
+      const parts = value.split('.')
+      if (parts.length > 2) value = parts[0] + '.' + parts[1]
+      if (parts[1] && parts[1].length > 2) {
+        value = parts[0] + '.' + parts[1].slice(0, 2)
+      }
+    }
     this.setData({
-      amount: e.detail.value
+      amount: value
     })
     this.checkCanSave()
   },
 
   // 备注输入
-  onRemarkInput(e) {
+  bindRemarkInput(e) {
     this.setData({
       remark: e.detail.value
     })
@@ -53,12 +102,12 @@ Page({
   },
 
   // 保存每日收益
-  async saveDailyReturn() {
+  async submitReturn() {
     if (!this.data.canSave) return
 
     try {
-      const { productId, date, amount, remark } = this.data
-      await financeStorage.addDailyReturn(productId, {
+      const { product, date, amount, remark } = this.data
+      await financeStorage.addDailyReturn(product._id, {
         date,
         amount: Number(amount),
         remark: remark.trim()

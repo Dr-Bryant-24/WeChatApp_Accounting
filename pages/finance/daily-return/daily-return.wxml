@@ -1,26 +1,74 @@
 <view class="container">
-  <view class="form">
+  <!-- 顶部卡片 -->
+  <view class="product-card">
+    <view class="product-name">{{product.name}}</view>
+    <view class="product-amount">投资金额 ¥{{product.amount}}</view>
+  </view>
+
+  <!-- 记录表单 -->
+  <view class="form-container">
+    <view class="form-title">记录每日收益</view>
+    
+    <!-- 日期选择 -->
     <view class="form-item">
-      <text class="label">收益日期</text>
-      <picker mode="date" value="{{date}}" bindchange="onDateChange">
-        <view class="picker">
-          {{date || '请选择日期'}}
+      <view class="label">收益日期</view>
+      <picker mode="date" value="{{date}}" bindchange="bindDateChange">
+        <view class="picker-content">
+          <text>{{date}}</text>
+          <text class="picker-arrow">▼</text>
         </view>
       </picker>
     </view>
 
+    <!-- 收益金额 -->
     <view class="form-item">
-      <text class="label">收益金额</text>
-      <input type="digit" value="{{amount}}" bindinput="onAmountInput" placeholder="请输入收益金额"/>
+      <view class="label">收益金额</view>
+      <view class="input-wrapper">
+        <text class="currency-symbol">¥</text>
+        <input 
+          type="digit" 
+          value="{{amount}}"
+          bindinput="bindAmountInput"
+          placeholder="请输入收益金额"
+          placeholder-class="placeholder"
+        />
+      </view>
     </view>
 
+    <!-- 备注信息 -->
     <view class="form-item">
-      <text class="label">备注说明</text>
-      <input type="text" value="{{remark}}" bindinput="onRemarkInput" placeholder="请输入备注说明（选填）"/>
+      <view class="label">备注信息</view>
+      <input 
+        type="text" 
+        value="{{remark}}"
+        bindinput="bindRemarkInput"
+        placeholder="可选填"
+        placeholder-class="placeholder"
+      />
     </view>
   </view>
 
-  <view class="save-btn {{canSave ? '' : 'disabled'}}" bindtap="saveDailyReturn">
-    保存
+  <!-- 提交按钮 -->
+  <view class="button-group">
+    <button class="submit-btn" bindtap="submitReturn">保存收益记录</button>
+  </view>
+
+  <!-- 快捷操作区 -->
+  <view class="quick-actions">
+    <view class="quick-title">快捷操作</view>
+    <view class="quick-buttons">
+      <view class="quick-btn" bindtap="setToday">
+        <text class="quick-icon">📅</text>
+        <text>今日</text>
+      </view>
+      <view class="quick-btn" bindtap="setYesterday">
+        <text class="quick-icon">◀️</text>
+        <text>昨日</text>
+      </view>
+      <view class="quick-btn" bindtap="clearAmount">
+        <text class="quick-icon">🔄</text>
+        <text>清空</text>
+      </view>
+    </view>
   </view>
 </view> 

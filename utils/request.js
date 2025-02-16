@@ -57,6 +57,22 @@ const request = (url, options = {}) => {
   });
 };
 
+// 添加一个测试方法来检查 API 是否可用
+async function checkApiEndpoint(url, method = 'GET') {
+  try {
+    const response = await wx.request({
+      url,
+      method,
+      header: getHeaders()
+    })
+    console.log(`API ${method} ${url} 状态:`, response.statusCode)
+    return response.statusCode !== 404
+  } catch (error) {
+    console.error(`检查 API 失败:`, error)
+    return false
+  }
+}
+
 module.exports = {
   get: (url) => request(url),
   post: (url, data) => request(url, { method: 'POST', data }),

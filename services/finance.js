@@ -41,7 +41,6 @@ const financeStorage = {
   async deleteProduct(productId) {
     try {
       await request.delete(`/finance/products/${productId}`);
-      // 删除产品时，后端会自动删除相关的收益记录
     } catch (error) {
       console.error('删除产品失败:', error);
       throw error;
@@ -78,13 +77,34 @@ const financeStorage = {
     }
   },
 
+  // 删除每日收益记录
+  async deleteDailyReturn(productId, returnId) {
+    try {
+      if (!returnId) {
+        throw new Error('收益记录ID未定义')
+      }
+      
+      // 使用新的 API 路径删除记录
+      await request.delete(`/finance/returns/${returnId}`)
+      return true
+    } catch (error) {
+      console.error('删除收益记录失败:', error)
+      throw error
+    }
+  },
+
   // 计算某个产品的平均每日收益
-  calculateAverageReturn(productId) {
-    const returns = this.getDailyReturns(productId)
-    if (returns.length === 0) return 0
-    
-    const totalReturn = returns.reduce((sum, item) => sum + Number(item.amount), 0)
-    return (totalReturn / returns.length).toFixed(2)
+  async calculateAverageReturn(productId) {
+    try {
+      const returns = await this.getDailyReturns(productId)
+      if (returns.length === 0) return '0.00'
+      
+      const totalReturn = returns.reduce((sum, item) => sum + Number(item.amount), 0)
+      return (totalReturn / returns.length).toFixed(2)
+    } catch (error) {
+      console.error('计算平均收益失败:', error)
+      return '0.00'
+    }
   }
 }
 

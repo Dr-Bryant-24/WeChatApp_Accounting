@@ -209,7 +209,7 @@ Page({
       confirmColor: '#ff6b6b',
       success: (res) => {
         if (res.confirm) {
-          this.deleteReturn(returnItem.date)
+          this.deleteReturn(returnItem)
         }
       }
     })
@@ -224,9 +224,9 @@ Page({
   },
 
   // 删除收益记录
-  async deleteReturn(date) {
+  async deleteReturn(returnItem) {
     try {
-      await financeStorage.deleteDailyReturn(this.data.product._id, date)
+      await financeStorage.deleteDailyReturn(this.data.product._id, returnItem._id)
       
       wx.showToast({
         title: '删除成功',
@@ -234,7 +234,7 @@ Page({
       })
       
       // 重新加载数据
-      this.loadReturns()
+      await this.loadProductDetail(this.data.product._id)
     } catch (error) {
       console.error('删除失败:', error)
       wx.showToast({
