@@ -13,7 +13,10 @@ Page({
     monthTotalReturn: '0.00',
     version: appConfig.version,
     scrollOffsets: {},
-    isDragging: false
+    isDragging: false,
+    lastTouchTime: 0,
+    lastTouchX: 0,
+    touchVelocity: 0
   },
 
   onLoad() {
@@ -162,12 +165,21 @@ Page({
     const productId = e.currentTarget.dataset.productid
     if (!productId) return
 
+    // 停止任何正在进行的动画
+    if (this.inertiaTimer) {
+      clearInterval(this.inertiaTimer)
+      this.inertiaTimer = null
+    }
+
     this.touchStartX = e.touches[0].clientX
     this.currentProductId = productId
     this.isDragging = true
     
-    // 记录初始偏移量
+    // 记录初始偏移量和时间
     this.initialOffset = this.data.scrollOffsets[productId] || 0
+    this.lastTouchTime = Date.now()
+    this.lastTouchX = this.touchStartX
+    this.touchVelocity = 0
     
     // 记录触摸点的初始位置
     const touch = e.touches[0]
@@ -196,7 +208,24 @@ Page({
     const minOffset = -((chartData.length - 6) * totalBarWidth) - 50
     newOffset = Math.min(maxOffset, Math.max(minOffset, newOffset))
     
-    // 直接更新并重绘
+    // 计算移动速度
+    const currentTime = Date.now()
+    const timeDiff = currentTime - this.lastTouchTime
+    const touchDiff = touch.clientX - this.lastTouchX
+    
+    if (timeDiff > 0) {
+      // 如果时间差大于100ms，说明手指停留了，速度应该为0
+      if (timeDiff > 100) {
+        this.touchVelocity = 0
+      } else {
+        this.touchVelocity = touchDiff / timeDiff
+      }
+    }
+    
+    this.lastTouchTime = currentTime
+    this.lastTouchX = touch.clientX
+    
+    // 更新并重绘
     const scrollOffsets = { ...this.data.scrollOffsets }
     scrollOffsets[productId] = newOffset
     
@@ -208,30 +237,79 @@ Page({
   handleTouchEnd(e) {
     if (!this.isDragging) return
     
-    // 清除定时器
-    if (this.updateTimer) {
-      clearTimeout(this.updateTimer)
-      this.updateTimer = null
-    }
-    
     const productId = this.currentProductId
-    if (productId) {
-      // 计算最终位置（对齐到最近的柱子）
-      const barWidth = 30
-      const barSpacing = 20
-      const totalBarWidth = barWidth + barSpacing
-      const currentOffset = this.data.scrollOffsets[productId]
-      
-      // 对齐到最近的柱子位置
+    if (!productId) {
+      this.isDragging = false
+      return
+    }
+
+    // 检查最后一次移动是否已经过去太久（超过100ms认为是停留）
+    const currentTime = Date.now()
+    if (currentTime - this.lastTouchTime > 100) {
+      this.touchVelocity = 0
+    }
+
+    // 获取当前偏移量和图表数据
+    const currentOffset = this.data.scrollOffsets[productId]
+    const chartData = this.data.chartDataMap[productId]
+    const barWidth = 30
+    const barSpacing = 20
+    const totalBarWidth = barWidth + barSpacing
+    
+    // 计算边界
+    const maxOffset = 50
+    const minOffset = -((chartData.length - 6) * totalBarWidth) - 50
+
+    // 根据最后的速度计算惯性滑动
+    let velocity = this.touchVelocity * 50 // 惯性系数
+    let currentVelocity = velocity
+    let currentPosition = currentOffset
+
+    // 如果速度足够大，启动惯性动画
+    if (Math.abs(velocity) > 0.1) {
+      // 使用setInterval创建动画循环
+      this.inertiaTimer = setInterval(() => {
+        // 应用摩擦力
+        currentVelocity *= 0.95 // 摩擦系数
+
+        // 更新位置
+        currentPosition += currentVelocity
+
+        // 检查边界
+        if (currentPosition > maxOffset) {
+          currentPosition = maxOffset
+          currentVelocity = 0
+          clearInterval(this.inertiaTimer)
+        } else if (currentPosition < minOffset) {
+          currentPosition = minOffset
+          currentVelocity = 0
+          clearInterval(this.inertiaTimer)
+        }
+
+        // 更新图表位置
+        const scrollOffsets = { ...this.data.scrollOffsets }
+        scrollOffsets[productId] = currentPosition
+        this.setData({ scrollOffsets })
+        this.drawChart(productId, currentPosition)
+
+        // 当速度足够小时停止动画
+        if (Math.abs(currentVelocity) < 0.1) {
+          clearInterval(this.inertiaTimer)
+          // 停止时对齐到最近的柱子
+          const alignedOffset = Math.round(currentPosition / totalBarWidth) * totalBarWidth
+          const scrollOffsets = { ...this.data.scrollOffsets }
+          scrollOffsets[productId] = alignedOffset
+          this.setData({ scrollOffsets })
+          this.drawChart(productId, alignedOffset)
+        }
+      }, 16) // 约60fps的刷新率
+    } else {
+      // 如果速度太小，直接对齐到最近的柱子
       const alignedOffset = Math.round(currentOffset / totalBarWidth) * totalBarWidth
-      
-      // 添加弹性动画效果
       const scrollOffsets = { ...this.data.scrollOffsets }
       scrollOffsets[productId] = alignedOffset
-      
-      this.setData({ scrollOffsets }, () => {
-        this.drawChart(productId, alignedOffset)
-      })
+      this.setData({ scrollOffsets })
+      this.drawChart(productId, alignedOffset)
     }
     
     // 清理状态
@@ -239,6 +317,7 @@ Page({
     this.currentProductId = null
     this.startX = null
     this.initialOffset = null
+    this.touchVelocity = 0
   },
 
   // 优化绘图方法
@@ -255,13 +334,26 @@ Page({
         const canvas = res[0].node
         const ctx = canvas.getContext('2d')
         
+        // 获取设备像素比
+        const dpr = wx.getSystemInfoSync().pixelRatio
+        
+        // 获取容器的宽高
         const systemInfo = wx.getSystemInfoSync()
         const canvasWidth = systemInfo.windowWidth * 0.92
         const canvasHeight = 180
         
-        // 设置画布尺寸
-        canvas.width = canvasWidth
-        canvas.height = canvasHeight
+        // 设置画布尺寸，考虑设备像素比
+        canvas.width = canvasWidth * dpr
+        canvas.height = canvasHeight * dpr
+        
+        // 设置画布的样式尺寸
+        canvas.style = {
+          width: canvasWidth + 'px',
+          height: canvasHeight + 'px'
+        }
+        
+        // 缩放绘图上下文以适应设备像素比
+        ctx.scale(dpr, dpr)
         
         // 清空画布
         ctx.clearRect(0, 0, canvasWidth, canvasHeight)
