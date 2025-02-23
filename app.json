@@ -28,12 +28,6 @@
         "selectedIconPath": "./assets/tab-icons/bill_selected.png"
       },
       {
-        "pagePath": "pages/add/add",
-        "text": "记账",
-        "iconPath": "./assets/tab-icons/add.png",
-        "selectedIconPath": "./assets/tab-icons/add_selected.png"
-      },
-      {
         "pagePath": "pages/statistics/statistics",
         "text": "统计",
         "iconPath": "./assets/tab-icons/statistics.png",

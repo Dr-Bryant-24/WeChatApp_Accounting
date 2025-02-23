@@ -71,6 +71,13 @@ Page({
 
   },
 
+  // 跳转到记账页面
+  navigateToAdd() {
+    wx.navigateTo({
+      url: '/pages/add/add'
+    })
+  },
+
   async loadBills() {
     try {
       // 改为 await 异步调用
