@@ -1,5 +1,6 @@
 // pages/add/add.js
 const { billStorage, categoryStorage } = require('../../services/storage')
+const request = require('../../utils/request')
 
 Page({
 
@@ -7,19 +8,52 @@ Page({
    * 页面的初始数据
    */
   data: {
+    id: '', // 账单ID，用于区分新增和编辑模式
     type: 'expense', // expense 或 income
     amount: '',
     categories: [],
     selectedCategory: null,
     remark: '',
-    canSave: false
+    canSave: false,
+    date: new Date().toISOString().split('T')[0], // 实际日期值
+    dateText: '今天' // 显示的日期文本
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-    this.loadCategories()
+    console.log('页面加载参数:', options); // 添加日志，查看传入的参数
+    
+    // 如果传入了账单信息，说明是编辑模式
+    if (options.id) {
+      // 解码可能包含特殊字符的参数
+      const category = decodeURIComponent(options.category);
+      const description = decodeURIComponent(options.description);
+      
+      this.setData({
+        id: options.id,
+        type: options.type,
+        amount: options.amount,
+        date: options.date,
+        remark: description
+      }, () => {
+        // 加载分类后，设置选中的分类
+        this.loadCategories().then(() => {
+          const selectedCategory = this.data.categories.find(c => c.name === category);
+          if (selectedCategory) {
+            this.setData({ 
+              selectedCategory,
+              canSave: true
+            });
+          }
+        });
+        this.updateDateText();
+      });
+    }
+    
+    this.loadCategories();
+    this.updateDateText();
   },
 
   /**
@@ -76,6 +110,7 @@ Page({
     const categories = categoryStorage.getCategories()
     const typeCategories = categories.filter(c => c.type === this.data.type)
     this.setData({ categories: typeCategories })
+    return Promise.resolve(typeCategories)
   },
 
   // 切换收支类型
@@ -120,32 +155,86 @@ Page({
     this.setData({ canSave })
   },
 
-  // 保存账单
-  saveBill() {
-    if (!this.data.canSave) return
+  // 更新日期显示文本
+  updateDateText() {
+    const today = new Date().toISOString().split('T')[0]
+    const dateText = this.data.date === today ? '今天' : this.data.date
+    this.setData({ dateText })
+  },
 
-    const { type, amount, selectedCategory, remark } = this.data
-    const bill = {
+  // 日期选择改变
+  onDateChange(e) {
+    this.setData({ date: e.detail.value }, () => {
+      this.updateDateText()
+    })
+  },
+
+  // 保存账单
+  async saveBill() {
+    if (!this.data.canSave) return;
+
+    const { id, type, amount, selectedCategory, remark, date } = this.data;
+    const billData = {
       type,
       amount: Number(amount),
       category: selectedCategory.name,
-      categoryId: selectedCategory.id,
-      remark
+      date: date,
+      description: remark || ''
+    };
+
+    try {
+      wx.showLoading({ title: '保存中...' });
+
+      if (id) {
+        // 编辑模式：先删除原账单
+        try {
+          console.log('删除原账单:', id); // 添加日志，查看要删除的账单ID
+          const deleteResponse = await request.delete(`/bills/${id}`);
+          console.log('删除响应:', deleteResponse); // 添加日志，查看删除响应
+        } catch (error) {
+          console.error('删除原账单失败:', error);
+          wx.hideLoading();
+          wx.showToast({
+            title: '编辑失败',
+            icon: 'error',
+            duration: 2000
+          });
+          return;
+        }
+      }
+
+      // 保存新账单
+      const addResponse = await billStorage.addBill(billData);
+      console.log('保存新账单响应:', addResponse); // 添加日志，查看保存响应
+      
+      wx.hideLoading();
+      wx.showToast({
+        title: id ? '编辑成功' : '保存成功',
+        icon: 'success',
+        duration: 2000
+      });
+
+      // 重置表单，但保持当前日期不变
+      this.setData({
+        id: '', // 清除ID
+        amount: '',
+        selectedCategory: null,
+        remark: '',
+        canSave: false
+      });
+
+      // 返回上一页
+      setTimeout(() => {
+        wx.navigateBack();
+      }, 1500);
+    } catch (error) {
+      console.error('保存账单失败:', error); // 添加错误日志
+      wx.hideLoading();
+      wx.showToast({
+        title: id ? '编辑失败' : '保存失败',
+        icon: 'error',
+        duration: 2000
+      });
     }
-
-    billStorage.addBill(bill)
-    wx.showToast({
-      title: '保存成功',
-      icon: 'success',
-      duration: 2000
-    })
-
-    // 重置表单
-    this.setData({
-      amount: '',
-      selectedCategory: null,
-      remark: '',
-      canSave: false
-    })
   }
 })

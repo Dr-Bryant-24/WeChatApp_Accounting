@@ -54,6 +54,10 @@
 .bill-list {
   background-color: #fff;
   padding: 0 30rpx;
+  margin-top: -30rpx;
+  position: relative;
+  z-index: 1;
+  padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
 }
 
 .bill-item {
@@ -115,17 +119,23 @@
   justify-content: center;
 }
 
+.year {
+  font-size: 32rpx;
+  color: rgba(255, 255, 255, 0.95);
+  margin-right: 10rpx;
+  font-weight: 500;
+}
+
 .month {
   font-size: 40rpx;
   font-weight: 600;
   margin-right: 10rpx;
-  color: #ffffff;
 }
 
 .picker-arrow {
   font-size: 32rpx;
-  color: rgba(255, 255, 255, 0.95);
   transform: rotate(90deg);
+  display: inline-block;
 }
 
 .overview {
@@ -154,7 +164,6 @@
   color: rgba(255, 255, 255, 0.95);
   margin-bottom: 10rpx;
   display: block;
-  font-weight: 500;
 }
 
 .amount {
@@ -163,49 +172,63 @@
   color: #ffffff;
 }
 
-/* 账单列表 */
-.bill-list {
-  margin-top: -30rpx;
-  position: relative;
-  z-index: 1;
-  padding: 0 30rpx;
+/* 日期卡片 */
+.date-card {
+  background: white;
+  border-radius: 20rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  overflow: hidden;
 }
 
 .date-header {
+  padding: 20rpx 30rpx;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 30rpx 0 20rpx;
-}
-
-.date-text {
-  font-size: 28rpx;
+  border-bottom: 2rpx solid #f5f5f5;
   color: #666;
-  font-weight: 500;
+  font-size: 26rpx;
 }
 
-.date-summary {
-  font-size: 24rpx;
+.date-info {
+  display: flex;
+  align-items: center;
 }
 
-.date-summary .expense {
-  color: #ff6b6b;
-  margin-right: 20rpx;
+.date {
+  color: inherit;
 }
 
-.date-summary .income {
-  color: #00b09b;
+.day-of-week {
+  opacity: 0.8;
+}
+
+.daily-amount {
+  display: flex;
+  gap: 20rpx;
+}
+
+.daily-amount .expense,
+.daily-amount .income {
+  color: inherit;
+}
+
+/* 账单项目 */
+.bill-items {
+  padding: 0 30rpx;
 }
 
 .bill-item {
-  background: white;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  margin-bottom: 20rpx;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  padding: 30rpx 0;
+  border-bottom: 2rpx solid #f5f5f5;
+}
+
+.bill-item:last-child {
+  border-bottom: none;
 }
 
 .category-info {
@@ -221,16 +244,20 @@
   align-items: center;
   justify-content: center;
   margin-right: 20rpx;
-  font-size: 40rpx;
-  color: white;
 }
 
 .icon-wrap.expense {
   background: linear-gradient(135deg, #ff6b6b, #ee0979);
+  color: white;
 }
 
 .icon-wrap.income {
   background: linear-gradient(135deg, #00b09b, #96c93d);
+  color: white;
+}
+
+.icon {
+  font-size: 40rpx;
 }
 
 .bill-detail {
@@ -244,13 +271,13 @@
   margin-bottom: 6rpx;
 }
 
-.time {
+.description {
   font-size: 24rpx;
   color: #999;
 }
 
 .amount-info {
-  font-size: 34rpx;
+  font-size: 32rpx;
   font-weight: 500;
 }
 
@@ -266,22 +293,13 @@
 .empty-state {
   padding: 200rpx 0;
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.empty-icon {
-  font-size: 120rpx;
-  margin-bottom: 30rpx;
-  color: #ddd;
 }
 
 .empty-text {
   font-size: 32rpx;
   color: #666;
   margin-bottom: 20rpx;
-  font-weight: 500;
+  display: block;
 }
 
 .empty-tip {
@@ -296,22 +314,23 @@
   bottom: calc(40rpx + env(safe-area-inset-bottom));
   width: 100rpx;
   height: 100rpx;
-  background: #e0e0e0;
+  background: linear-gradient(135deg, #3494e6, #ec6ead);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4rpx 16rpx rgba(236, 110, 173, 0.3);
   transition: all 0.3s ease;
+  z-index: 100;
 }
 
 .add-button:active {
   transform: scale(0.95);
-  background: #d8d8d8;
+  box-shadow: 0 2rpx 8rpx rgba(236, 110, 173, 0.2);
 }
 
 .add-icon {
-  color: #555;
+  color: white;
   font-size: 50rpx;
   line-height: 1;
   height: 50rpx;

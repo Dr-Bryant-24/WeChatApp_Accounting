@@ -24,34 +24,73 @@ const defaultCategories = [
 
 // 账单相关操作
 const billStorage = {
-  // 获取账单列表
-  async getBills() {
+  // 获取月度账单
+  async getMonthlyBills(year, month) {
     try {
-      const bills = wx.getStorageSync('BILLS') || []
-      return Array.isArray(bills) ? bills : []
+      const response = await request.get(`/bills/monthly/${year}/${month}`)
+      return response || {
+        bills: [],
+        stats: { income: 0, expense: 0, balance: 0 },
+        categories: {
+          income: { total: 0, items: [] },
+          expense: { total: 0, items: [] }
+        }
+      }
     } catch (error) {
-      console.error('获取账单失败:', error)
-      return []
+      console.error('获取月度账单失败:', error)
+      return {
+        bills: [],
+        stats: { income: 0, expense: 0, balance: 0 },
+        categories: {
+          income: { total: 0, items: [] },
+          expense: { total: 0, items: [] }
+        }
+      }
+    }
+  },
+
+  // 获取日账单
+  async getDailyBills(date) {
+    try {
+      const formattedDate = date instanceof Date ? 
+        date.toISOString().split('T')[0] : 
+        date
+      const response = await request.get(`/bills/daily/${formattedDate}`)
+      return response || { bills: [], stats: { income: 0, expense: 0, balance: 0 } }
+    } catch (error) {
+      console.error('获取日账单失败:', error)
+      return { bills: [], stats: { income: 0, expense: 0, balance: 0 } }
     }
   },
   
   // 添加账单
   async addBill(bill) {
     try {
-      return await request.post('/bills', bill);
+      return await request.post('/bills', bill)
     } catch (error) {
-      console.error('添加账单失败:', error);
-      throw error;
+      console.error('添加账单失败:', error)
+      throw error
     }
   },
   
   // 删除账单
   async deleteBill(id) {
     try {
-      await request.delete(`/bills/${id}`);
+      await request.delete(`/bills/${id}`)
     } catch (error) {
-      console.error('删除账单失败:', error);
-      throw error;
+      console.error('删除账单失败:', error)
+      throw error
+    }
+  },
+
+  // 获取月度统计数据
+  async getMonthlyStats(year, month) {
+    try {
+      const response = await request.get(`/bills/stats/${year}/${month}`)
+      return response || { daily: [] }
+    } catch (error) {
+      console.error('获取月度统计失败:', error)
+      return { daily: [] }
     }
   }
 }
@@ -68,8 +107,8 @@ const categoryStorage = {
       }
       return categories
     } catch (error) {
-      console.error('获取分类失败:', error);
-      return defaultCategories;
+      console.error('获取分类失败:', error)
+      return defaultCategories
     }
   },
   
@@ -83,8 +122,8 @@ const categoryStorage = {
       })
       wx.setStorageSync(CATEGORY_KEY, categories)
     } catch (error) {
-      console.error('添加分类失败:', error);
-      throw error;
+      console.error('添加分类失败:', error)
+      throw error
     }
   },
 

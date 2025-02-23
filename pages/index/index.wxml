@@ -3,9 +3,9 @@
   <!-- 顶部卡片 -->
   <view class="header-card">
     <view class="month-picker">
-      <picker mode="date" fields="month" value="{{currentDate}}" bindchange="dateChange">
+      <picker mode="date" fields="month" value="{{currentYear}}-{{currentMonth}}" bindchange="dateChange">
         <view class="picker-content">
-          <text class="year">{{currentYear}}</text>
+          <text class="year">{{currentYear}}年</text>
           <text class="month">{{currentMonth}}月</text>
           <text class="picker-arrow">›</text>
         </view>
@@ -27,31 +27,56 @@
 
   <!-- 账单列表 -->
   <view class="bill-list">
-    <block wx:for="{{bills}}" wx:key="id">
-      <!-- 日期分组 -->
-      <block wx:if="{{item.showDate}}">
+    <block wx:for="{{bills}}" wx:key="date">
+      <!-- 日期卡片 -->
+      <view class="date-card">
         <view class="date-header">
-          <text class="date-text">{{item.date}}</text>
-          <view class="date-summary">
-            <text class="expense">支出 ¥{{item.dayExpense}}</text>
-            <text class="income">收入 ¥{{item.dayIncome}}</text>
+          <view class="date-info">
+            <text class="date">{{item.date}} {{item.dayOfWeek}}</text>
+          </view>
+          <view class="daily-amount">
+            <block wx:if="{{item.dayExpense > 0}}">
+              <text class="expense">支 {{item.dayExpense}}</text>
+            </block>
+            <block wx:if="{{item.dayIncome > 0}}">
+              <text class="income">收 {{item.dayIncome}}</text>
+            </block>
           </view>
         </view>
-      </block>
 
-      <!-- 账单项 -->
-      <view class="bill-item">
-        <view class="category-info">
-          <view class="icon-wrap {{item.type}}">
-            <text class="icon">{{item.icon}}</text>
+        <!-- 当日账单列表 -->
+        <view class="bill-items">
+          <view class="bill-item" 
+            wx:for="{{item.bills}}" 
+            wx:key="id" 
+            wx:for-item="bill"
+            bindlongpress="showBillOptions"
+            data-bill="{{bill}}">
+            <view class="category-info">
+              <view class="icon-wrap {{bill.type}}">
+                <text class="icon">{{bill.category === '餐饮' ? '🍱' : 
+                                   bill.category === '交通' ? '🚊' :
+                                   bill.category === '购物' ? '🛍️' :
+                                   bill.category === '娱乐' ? '🎮' :
+                                   bill.category === '居住' ? '🏠' :
+                                   bill.category === '医疗' ? '💊' :
+                                   bill.category === '教育' ? '📚' :
+                                   bill.category === '日用' ? '🧴' :
+                                   bill.category === '工资' ? '💵' :
+                                   bill.category === '兼职' ? '💼' :
+                                   bill.category === '理财' ? '📈' :
+                                   bill.category === '奖金' ? '🎁' :
+                                   bill.category === '退款' ? '🔄' : '💰'}}</text>
+              </view>
+              <view class="bill-detail">
+                <text class="category-name">{{bill.category}}</text>
+                <text class="description" wx:if="{{bill.description}}">{{bill.description}}</text>
+              </view>
+            </view>
+            <view class="amount-info {{bill.type}}">
+              <text>{{bill.type === 'expense' ? '-' : '+'}}{{bill.amount}}</text>
+            </view>
           </view>
-          <view class="bill-detail">
-            <text class="category-name">{{item.category}}</text>
-            <text class="time">{{item.time}}</text>
-          </view>
-        </view>
-        <view class="amount-info {{item.type}}">
-          <text>{{item.type === 'expense' ? '-' : '+'}}¥{{item.amount}}</text>
         </view>
       </view>
     </block>

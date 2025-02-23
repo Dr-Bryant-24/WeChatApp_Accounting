@@ -46,7 +46,7 @@
         </view>
         <picker mode="date" value="{{date}}" bindchange="onDateChange">
           <view class="item-value">
-            <text>{{date || '今天'}}</text>
+            <text>{{dateText}}</text>
             <text class="arrow">›</text>
           </view>
         </picker>
